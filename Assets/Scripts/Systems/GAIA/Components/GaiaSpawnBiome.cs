@@ -6,7 +6,8 @@ using Biome = DreamersIncStudio.GAIACollective.GaiaSpawnBiome;
 namespace DreamersIncStudio.GAIACollective.Authoring
 {
     public class GaiaSpawnBiome : MonoBehaviour
-    {        
+    {    
+        public uint BiomeID;
         public TimeSpawnSettings Daybreak;
         public TimeSpawnSettings Midday;
         public TimeSpawnSettings Sunset;
@@ -31,12 +32,13 @@ namespace DreamersIncStudio.GAIACollective
 {
     public struct GaiaSpawnBiome: IComponentData
     {
+        public uint BiomeID;
         public TimeSpawnSettings Daybreak;
         public TimeSpawnSettings Midday;
         public TimeSpawnSettings Sunset;
         public TimeSpawnSettings Night;
     
-        public GaiaSpawnBiome(Authoring.GaiaSpawnBiome gaiaSpawnBiome)
+        public GaiaSpawnBiome( Authoring.GaiaSpawnBiome gaiaSpawnBiome)
         {
             Daybreak.SpawnData = new FixedList512Bytes<SpawnData>();
             Daybreak.IsSatisfied = false;
@@ -58,13 +60,13 @@ namespace DreamersIncStudio.GAIACollective
                 Night.SpawnData.Add(spawnData);
             foreach(var spawnData in gaiaSpawnBiome.Sunset.SpawnData)
                 Sunset.SpawnData.Add(spawnData);
-   
+            BiomeID = gaiaSpawnBiome.BiomeID;
         }
     }
     [System.Serializable]
     public struct TimeSpawnSettings
     {
-       public FixedList512Bytes<SpawnData> SpawnData; 
+       public FixedList128Bytes<SpawnData> SpawnData; 
        public bool IsSatisfied;
     }
 
