@@ -13,7 +13,7 @@ namespace DreamersIncStudio.GAIACollective
             {
                 var entity = GetEntity(TransformUsageFlags.None);
                 AddComponent<RunningTag>(entity);
-                AddComponent(entity,new GaiaSettings(authoring.configuration));
+                AddComponent(entity,new GaiaLightSettings(authoring.configuration));
                 AddComponent(entity, new GaiaTime(authoring.startTimeOfDay,authoring.configuration));
             }
         }

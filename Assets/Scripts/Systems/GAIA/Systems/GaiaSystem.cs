@@ -14,8 +14,10 @@ namespace DreamersIncStudio.GAIACollective
         protected override void OnUpdate()
         {
             var gaiaTime =  SystemAPI.GetSingletonRW<GaiaTime>();
-            var gaiaSettings = SystemAPI.GetSingleton<GaiaSettings>();
+            var gaiaSettings = SystemAPI.GetSingleton<GaiaLightSettings>();
             gaiaTime.ValueRW.UpdateTime(SystemAPI.Time.DeltaTime);
+            var timeOfDay = gaiaTime.ValueRO.TimeOfDay;
+            #region  Lighting
             Entities.WithoutBurst().ForEach((Light light) =>
             {
                 var rotationPivot = light.transform;
@@ -26,21 +28,21 @@ namespace DreamersIncStudio.GAIACollective
                     rotationPivot.localRotation = Quaternion.Euler(new Vector3(xRotation, 0, 0));
                 }
                 
-                TimeSettings from, to;
+                TimeLightingSettings from, to;
                 float blend;
-                switch (gaiaTime.ValueRO.TimeOfDay)
+                switch (timeOfDay)
                 {
                     case < 6f:
-                        from = gaiaSettings.Night; to = gaiaSettings.Daybreak; blend = gaiaTime.ValueRO.TimeOfDay / 6f;
+                        from = gaiaSettings.Night; to = gaiaSettings.Daybreak; blend = timeOfDay/ 6f;
                         break;
                     case < 12f:
-                        from = gaiaSettings.Daybreak; to = gaiaSettings.Midday; blend = (gaiaTime.ValueRO.TimeOfDay- 6f) / 6f;
+                        from = gaiaSettings.Daybreak; to = gaiaSettings.Midday; blend = (timeOfDay- 6f) / 6f;
                         break;
                     case < 18f:
-                        from = gaiaSettings.Midday; to = gaiaSettings.Sunset; blend = (gaiaTime.ValueRO.TimeOfDay - 12f) / 6f;
+                        from = gaiaSettings.Midday; to = gaiaSettings.Sunset; blend = (timeOfDay - 12f) / 6f;
                         break;
                     default:
-                        from = gaiaSettings.Sunset; to = gaiaSettings.Night; blend = (gaiaTime.ValueRO.TimeOfDay - 18f) / 6f;
+                        from = gaiaSettings.Sunset; to = gaiaSettings.Night; blend = (timeOfDay - 18f) / 6f;
                         break;
                 }
                 RenderSettings.ambientLight = Color.Lerp(from.ambientColor, to.ambientColor, blend);
@@ -54,8 +56,51 @@ namespace DreamersIncStudio.GAIACollective
                     RenderSettings.fogDensity = Mathf.Lerp(from.fogDensity, to.fogDensity, blend);
                 }
             }).Run();
-            
-       
+            #endregion
+
+            #region Spawning
+
+            Entities.ForEach((ref GaiaSpawnBiome biome) =>
+            {
+                switch (timeOfDay)
+                {
+                    case < 6f:
+                        if(biome.Daybreak.IsSatisfied)return;
+                        Debug.Log("Daybreak Spawn");
+                        biome.Daybreak.IsSatisfied = true;
+                        biome.Midday.IsSatisfied = false;
+                        biome.Sunset.IsSatisfied = false;
+                        biome.Night.IsSatisfied = false;
+                        break;
+                    case < 12f:
+                        if(biome.Midday.IsSatisfied)return;
+                        Debug.Log("Midday Spawn");
+                        biome.Midday.IsSatisfied = true;
+                        biome.Daybreak.IsSatisfied = false;
+                        biome.Sunset.IsSatisfied = false;
+                        biome.Night.IsSatisfied = false;
+                        break;
+                    case < 18f:
+                        if(biome.Sunset.IsSatisfied)return;
+                        Debug.Log("Sunset Spawn");
+                        biome.Sunset.IsSatisfied = true;
+                        biome.Daybreak.IsSatisfied = false;
+                        biome.Midday.IsSatisfied = false;
+                        biome.Night.IsSatisfied = false;
+                        break;
+                    default:
+                        if(biome.Night.IsSatisfied)return;
+                        Debug.Log("Night Spawn");
+                        biome.Night.IsSatisfied = true;
+                        biome.Midday.IsSatisfied = false;
+                        biome.Sunset.IsSatisfied = false;
+                        biome.Daybreak.IsSatisfied = false;
+                        break;
+                }
+            }).Schedule();
+
+            #endregion
+
         }
         
     }

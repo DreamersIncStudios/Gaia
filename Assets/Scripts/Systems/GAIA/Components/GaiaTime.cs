@@ -36,31 +36,6 @@ namespace DreamersIncStudio.GAIACollective
         }
     }
 
-    public struct GaiaSettings : IComponentData
-    {
-        public bool EnableFogControl;
-        [Header("Daybreak Settings")]
-        public TimeSettings Daybreak;
-
-        [Header("Midday Settings")]
-        public TimeSettings Midday;
-
-        [Header("Sunset Settings")]
-        public TimeSettings Sunset;
-
-        [Header("Night Settings")]
-        public TimeSettings Night;
-
-        public GaiaSettings(GaiaConfiguration configuration)
-        {
-            Daybreak = configuration.Daybreak;
-            Midday = configuration.Midday;
-            Sunset = configuration.Sunset;
-            Night = configuration.Night;
-            EnableFogControl = configuration.EnableFogControl;
-        }
-    }
-
     public struct RunningTag : IComponentData
     {
     }
