@@ -50,12 +50,12 @@ namespace DreamersIncStudio.GAIACollective
             public bool Respawn => respawnTime <= 0.0f;
         public float respawnTime;
         public int RespawnInterval;
-            public void Spawn(EntityCommandBuffer endBuffer)
+            public void Spawn()
             {
                 var cnt = Qty - qtySpawned;
                 for (var i = 0; i < cnt; i++)
                 {
-                    new CharacterBuilder("spawn", endBuffer, out var entity)
+                    new CharacterBuilder("spawn", out var entity)
                         .WithActiveHour(ActiveHours)
                         .Build();
                     qtySpawned++;

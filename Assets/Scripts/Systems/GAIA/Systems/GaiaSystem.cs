@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Systems.Bestiary;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Transforms;
 using UnityEngine;
 
 namespace DreamersIncStudio.GAIACollective
@@ -76,7 +77,7 @@ namespace DreamersIncStudio.GAIACollective
             #region Spawning
              var   entities = new List<AgentInfo>();
              var existingEntities = new HashSet<AgentInfo>();
-            Entities.WithoutBurst().ForEach((ref GaiaSpawnBiome biome) =>
+            Entities.WithStructuralChanges().WithoutBurst().ForEach((ref GaiaSpawnBiome biome) =>
             {
                 for (var index = 0; index < biome.SpawnData.Length; index++)
                 {
@@ -89,7 +90,7 @@ namespace DreamersIncStudio.GAIACollective
                             spawn.ResetRespawn();
                             break;
                         default:
-                            spawn.Spawn(endBuffer);
+                            spawn.Spawn();
                             break;
                     }
                     spawn.Countdown(SystemAPI.Time.DeltaTime);
