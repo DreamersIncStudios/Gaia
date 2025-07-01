@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Systems.Bestiary;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -69,92 +70,31 @@ namespace DreamersIncStudio.GAIACollective
                 }
             }).Run();
             #endregion
-
+            
+            var ecb = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
+            var endBuffer = ecb.CreateCommandBuffer(World.Unmanaged);
             #region Spawning
              var   entities = new List<AgentInfo>();
              var existingEntities = new HashSet<AgentInfo>();
             Entities.WithoutBurst().ForEach((ref GaiaSpawnBiome biome) =>
-            {   
-                if(entityMapTesting.TryGetFirstValue(biome.BiomeID, out var value, out var iterator))
-                    do
-                    {
-                        existingEntities.Add(value);
-                    }while (entityMapTesting.TryGetNextValue(out value, ref iterator));
-
-                switch (timeOfDay)
+            {
+                for (var index = 0; index < biome.SpawnData.Length; index++)
                 {
-                    case < 6f:
-                        if(biome.Daybreak.IsSatisfied)return;
-                        Debug.Log("Daybreak Spawn");
-                        foreach (var spawnData in biome.Daybreak.SpawnData)
-                        {
-                            for (int i = 0; i < spawnData.Qty; i++)
-                            {
-                                var agent = new AgentInfo(biome.BiomeID, spawnData.SpawnID);
-                                if(existingEntities.Contains(agent))continue;
-                                entities.Add(new AgentInfo(biome.BiomeID,spawnData.SpawnID));
-                            }
-                        }
-
-                        biome.Daybreak.IsSatisfied = true;
-                        biome.Midday.IsSatisfied = false;
-                        biome.Sunset.IsSatisfied = false;
-                        biome.Night.IsSatisfied = false;
-                        break;
-                    case < 12f:
-                        if(biome.Midday.IsSatisfied)return;
-                        Debug.Log("Midday Spawn");
-                        foreach (var spawnData in biome.Daybreak.SpawnData)
-                        {
-                            for (int i = 0; i < spawnData.Qty; i++)
-                            {
-                                var agent = new AgentInfo(biome.BiomeID, spawnData.SpawnID);
-                                if(existingEntities.Contains(agent))continue;
-                                entities.Add(new AgentInfo(biome.BiomeID,spawnData.SpawnID));
-                            }
-                        }
-                        biome.Midday.IsSatisfied = true;
-                        biome.Daybreak.IsSatisfied = false;
-                        biome.Sunset.IsSatisfied = false;
-                        biome.Night.IsSatisfied = false;
-                        break;
-                    case < 18f:
-                        if(biome.Sunset.IsSatisfied)return;
-                        Debug.Log("Sunset Spawn");
-                        foreach (var spawnData in biome.Daybreak.SpawnData)
-                        {
-                            for (int i = 0; i < spawnData.Qty; i++)
-                            {
-                                var agent = new AgentInfo(biome.BiomeID, spawnData.SpawnID);
-                                if(existingEntities.Contains(agent))continue;
-                                entities.Add(new AgentInfo(biome.BiomeID,spawnData.SpawnID));
-                            }
-                        }
-                        biome.Sunset.IsSatisfied = true;
-                        biome.Daybreak.IsSatisfied = false;
-                        biome.Midday.IsSatisfied = false;
-                        biome.Night.IsSatisfied = false;
-                        break;
-                    default:
-                        if(biome.Night.IsSatisfied)return;
-                        Debug.Log("Night Spawn");
-                        foreach (var spawnData in biome.Daybreak.SpawnData)
-                        {
-                            for (int i = 0; i < spawnData.Qty; i++)
-                            {
-                                var agent = new AgentInfo(biome.BiomeID, spawnData.SpawnID);
-                                if(existingEntities.Contains(agent))continue;
-                                entities.Add(new AgentInfo(biome.BiomeID,spawnData.SpawnID));
-                            }
-                        }
-                        biome.Night.IsSatisfied = true;
-                        biome.Midday.IsSatisfied = false;
-                        biome.Sunset.IsSatisfied = false;
-                        biome.Daybreak.IsSatisfied = false;
-                        break;
+                    var spawn = biome.SpawnData[index];
+                    switch (spawn)
+                    {
+                        case { IsSatisfied: true, Respawn: false }:
+                            break;
+                        case { Respawn: true, IsSatisfied: true }:
+                            spawn.ResetRespawn();
+                            break;
+                        default:
+                            spawn.Spawn(endBuffer);
+                            break;
+                    }
+                    spawn.Countdown(SystemAPI.Time.DeltaTime);
+                    biome.SpawnData[index] = spawn;
                 }
-                
-                
             }).Run();
             if (entities.Count > 0)
             {

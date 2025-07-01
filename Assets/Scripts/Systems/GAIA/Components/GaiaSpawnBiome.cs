@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Systems.Bestiary;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -8,10 +9,7 @@ namespace DreamersIncStudio.GAIACollective.Authoring
     public class GaiaSpawnBiome : MonoBehaviour
     {    
         public uint BiomeID;
-        public TimeSpawnSettings Daybreak;
-        public TimeSpawnSettings Midday;
-        public TimeSpawnSettings Sunset;
-        public TimeSpawnSettings Night;
+        public List<SpawnData> SpawnData;
         public class Baker : Baker<GaiaSpawnBiome>
         {
             public override void Bake(GaiaSpawnBiome authoring)
@@ -20,12 +18,7 @@ namespace DreamersIncStudio.GAIACollective.Authoring
                 AddComponent(entity, new Biome(authoring));
             }
         }
-        [System.Serializable]
-        public struct TimeSpawnSettings
-        {
-            public List<SpawnData> SpawnData; 
-            public bool IsSatisfied;
-        }
+    
     }
 }
 namespace DreamersIncStudio.GAIACollective
@@ -33,48 +26,58 @@ namespace DreamersIncStudio.GAIACollective
     public struct GaiaSpawnBiome: IComponentData
     {
         public uint BiomeID;
-        public TimeSpawnSettings Daybreak;
-        public TimeSpawnSettings Midday;
-        public TimeSpawnSettings Sunset;
-        public TimeSpawnSettings Night;
-    
+        public FixedList512Bytes<SpawnData> SpawnData;
         public GaiaSpawnBiome( Authoring.GaiaSpawnBiome gaiaSpawnBiome)
         {
-            Daybreak.SpawnData = new FixedList512Bytes<SpawnData>();
-            Daybreak.IsSatisfied = false;
-            
-            Midday.SpawnData = new FixedList512Bytes<SpawnData>();
-            Midday.IsSatisfied = false;
-            
-            Night.SpawnData = new FixedList512Bytes<SpawnData>();
-            Night.IsSatisfied = false;
-            
-            Sunset.SpawnData = new FixedList512Bytes<SpawnData>();
-            Sunset.IsSatisfied = false;
-
-            foreach(var spawnData in gaiaSpawnBiome.Daybreak.SpawnData)
-                Daybreak.SpawnData.Add(spawnData);
-            foreach(var spawnData in gaiaSpawnBiome.Midday.SpawnData)
-                Midday.SpawnData.Add(spawnData);
-            foreach(var spawnData in gaiaSpawnBiome.Night.SpawnData)
-                Night.SpawnData.Add(spawnData);
-            foreach(var spawnData in gaiaSpawnBiome.Sunset.SpawnData)
-                Sunset.SpawnData.Add(spawnData);
             BiomeID = gaiaSpawnBiome.BiomeID;
+            SpawnData = new FixedList512Bytes<SpawnData>();
+            foreach (var spawn in gaiaSpawnBiome.SpawnData)
+            {
+                SpawnData.Add(spawn);
+            }
         }
     }
-    [System.Serializable]
-    public struct TimeSpawnSettings
-    {
-       public FixedList128Bytes<SpawnData> SpawnData; 
-       public bool IsSatisfied;
-    }
+  
 
     [System.Serializable]
     public struct SpawnData
     {
         public uint SpawnID;
+        public TimesOfDay ActiveHours;
         public uint Qty;
-            public bool IsSatisfied;
+        public uint qtySpawned;
+        public bool IsSatisfied => qtySpawned >= Qty;
+            public bool Respawn => respawnTime <= 0.0f;
+        public float respawnTime;
+        public int RespawnInterval;
+            public void Spawn(EntityCommandBuffer endBuffer)
+            {
+                var cnt = Qty - qtySpawned;
+                for (var i = 0; i < cnt; i++)
+                {
+                    new CharacterBuilder("spawn", endBuffer, out var entity)
+                        .WithActiveHour(ActiveHours)
+                        .Build();
+                    qtySpawned++;
+                }
+                ResetRespawn();
+            }
+
+            public void ResetRespawn()
+            {
+                respawnTime = Random.Range(.855f*400.0f, 1.075f* 400.0f);
+                
+            }
+
+            public void Countdown(float time)
+            {
+                respawnTime -= time;
+            }
+
+            public void SpawnKiller()
+            {
+                if(qtySpawned==0) return;
+                qtySpawned--;
+            }
     }
 }
