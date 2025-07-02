@@ -23,9 +23,9 @@ namespace Systems.Bestiary
           
         }
 
-        public CharacterBuilder WithActiveHour(TimesOfDay activeHour)
+        public CharacterBuilder WithActiveHour(TimesOfDay activeHour, uint HomeBiomeID)
         {
-            manager.AddComponentData(entity, new GaiaLife(activeHour));
+            manager.AddComponentData(entity, new GaiaLife(activeHour, HomeBiomeID));
             return this;
         }
 

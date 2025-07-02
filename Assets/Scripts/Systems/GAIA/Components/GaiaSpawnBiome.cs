@@ -45,27 +45,32 @@ namespace DreamersIncStudio.GAIACollective
         public uint SpawnID;
         public TimesOfDay ActiveHours;
         public uint Qty;
-        public uint qtySpawned;
+        private uint qtySpawned;
         public bool IsSatisfied => qtySpawned >= Qty;
             public bool Respawn => respawnTime <= 0.0f;
-        public float respawnTime;
+        private float respawnTime;
+        [Range(0,20)]
         public int RespawnInterval;
-            public void Spawn()
+            public void Spawn(uint HomeBiomeID)
             {
+                var entities = new List<Entity>();
                 var cnt = Qty - qtySpawned;
                 for (var i = 0; i < cnt; i++)
                 {
                     new CharacterBuilder("spawn", out var entity)
-                        .WithActiveHour(ActiveHours)
+                        .WithActiveHour(ActiveHours,HomeBiomeID)
                         .Build();
                     qtySpawned++;
+                    entities.Add(entity);
                 }
                 ResetRespawn();
+         
             }
 
             public void ResetRespawn()
             {
-                respawnTime = Random.Range(.855f*400.0f, 1.075f* 400.0f);
+                var interval = 60.0f * RespawnInterval;
+                respawnTime = Random.Range(.855f*interval, 1.075f* interval);
                 
             }
 

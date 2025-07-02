@@ -229,23 +229,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Version: 4
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
+  m_LightLayerMask: 1
+  m_RenderingLayers: 1
   m_CustomShadowLayers: 0
+  m_ShadowLayerMask: 1
+  m_ShadowRenderingLayers: 1
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 1
-  m_RenderingLayersMask:
-    serializedVersion: 0
-    m_Bits: 1
-  m_ShadowRenderingLayersMask:
-    serializedVersion: 0
-    m_Bits: 1
-  m_Version: 4
-  m_LightLayerMask: 1
-  m_ShadowLayerMask: 1
-  m_RenderingLayers: 1
-  m_ShadowRenderingLayers: 1
 --- !u!1 &1177896615
 GameObject:
   m_ObjectHideFlags: 0
@@ -308,30 +302,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DreamersIncStudio.GAIACollective.Authoring.GaiaSpawnBiome
   BiomeID: 0
-  Daybreak:
-    SpawnData:
-    - SpawnID: 1
-      Qty: 10
-      IsSatisfied: 0
-    IsSatisfied: 0
-  Midday:
-    SpawnData:
-    - SpawnID: 2
-      Qty: 10
-      IsSatisfied: 0
-    IsSatisfied: 0
-  Sunset:
-    SpawnData:
-    - SpawnID: 3
-      Qty: 10
-      IsSatisfied: 0
-    IsSatisfied: 0
-  Night:
-    SpawnData:
-    - SpawnID: 4
-      Qty: 10
-      IsSatisfied: 0
-    IsSatisfied: 0
+  SpawnData:
+  - SpawnID: 1
+    ActiveHours: 13
+    Qty: 30
+    RespawnInterval: 10
+  - SpawnID: 2
+    ActiveHours: 9
+    Qty: 30
+    RespawnInterval: 10
+  - SpawnID: 3
+    ActiveHours: 24
+    Qty: 30
+    RespawnInterval: 10
 --- !u!4 &1519253695
 Transform:
   m_ObjectHideFlags: 0
