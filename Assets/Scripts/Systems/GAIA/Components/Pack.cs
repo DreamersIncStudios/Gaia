@@ -18,9 +18,9 @@ namespace DreamersIncStudio.GAIACollective
         public float AlignmentFactor;
         public float3 HerdCenter; // Central point for the herd
         public int MemberCount;
-        
+        public uint BiomeID;
 
-        public Pack AssaultTeam() => new Pack()
+        public static Pack AssaultTeam(uint BiomeID) => new Pack()
         {
             Requirements =  new FixedList128Bytes<PackRole>()
             {
@@ -34,10 +34,11 @@ namespace DreamersIncStudio.GAIACollective
             CohesionFactor = 1.0f,
             SeparationFactor = 2.0f,
             AlignmentFactor = 0.5f,
+            BiomeID = BiomeID
         };
         
         
-        public Pack Support() => new Pack()
+        public static Pack Support(uint BiomeID) => new Pack()
         {
             Requirements =  new FixedList128Bytes<PackRole>()
             {
@@ -51,6 +52,7 @@ namespace DreamersIncStudio.GAIACollective
             CohesionFactor = 1.0f,
             SeparationFactor = 2.0f,
             AlignmentFactor = 0.5f,
+            BiomeID = BiomeID
         };
     }
 

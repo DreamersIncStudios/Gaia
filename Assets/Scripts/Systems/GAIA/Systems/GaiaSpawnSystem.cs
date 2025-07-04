@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-using System.Linq;
-using Systems.Bestiary;
+using System;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
@@ -15,17 +13,15 @@ namespace DreamersIncStudio.GAIACollective
             RateManager = new RateUtils.VariableRateManager(80, true);
         }
     }
-
-    public partial class GaiaSystem : SystemBase
+    [UpdateInGroup(typeof(GaiaUpdateGroup))]
+    public partial class GaiaSpawnSystem : SystemBase
     {
-        private NativeParallelMultiHashMap<uint, AgentInfo> entityMapTesting;
-
+    
         protected override void OnCreate()
         {
             RequireForUpdate<RunningTag>();
             RequireForUpdate<GaiaTime>();
-            entityMapTesting = new NativeParallelMultiHashMap<uint, AgentInfo>(0, Allocator.Persistent);
-
+       
         }
 
 
@@ -123,6 +119,49 @@ namespace DreamersIncStudio.GAIACollective
                     biome.SpawnData[index] = spawn;
                 }
 
+                #region Pack Spawn
+                for (var i = 0; i < biome.PacksToSpawn.Length; i++)
+                {
+                    var packInfo = biome.PacksToSpawn[i];
+                    if(packInfo.Satisfied) continue;
+                    // ReSharper disable once Unity.BurstFunctionSignatureContainsManagedTypes
+                    var baseEntityArch = EntityManager.CreateArchetype(
+                        new ComponentType[]
+                        {
+                            typeof(LocalTransform),
+                            typeof(LocalToWorld)
+                        }
+                    );
+                    var baseDataEntity = EntityManager.CreateEntity(baseEntityArch);
+
+                    switch (packInfo.PackType)
+                    {
+                        case PackType.Assault:
+                            EntityManager.AddComponentData(baseDataEntity, Pack.AssaultTeam(biome.BiomeID));
+                           
+                            break;
+                        case PackType.Support:
+                            EntityManager.AddComponentData(baseDataEntity, Pack.Support(biome.BiomeID));
+
+                            break;
+                        case PackType.Transport:
+                            break;
+                        case PackType.Scavengers:
+                            break;
+                        case PackType.Recon:
+                            break;
+                        case PackType.Combat:
+                            break;
+                        case PackType.Acquisition:
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                    packInfo.Qty++;
+                    biome.PacksToSpawn[i] = packInfo;
+                }
+                #endregion
+                
             }).Run();
             if (!updateHashMap) return;
             var control = SystemAPI.GetSingleton<GaiaControl>();

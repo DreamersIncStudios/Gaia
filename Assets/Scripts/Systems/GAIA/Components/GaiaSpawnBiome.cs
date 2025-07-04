@@ -10,6 +10,7 @@ namespace DreamersIncStudio.GAIACollective.Authoring
     {    
         public uint BiomeID;
         public List<SpawnData> SpawnData;
+        public List<PackInfo> PacksToSpawn;
         public class Baker : Baker<GaiaSpawnBiome>
         {
             public override void Bake(GaiaSpawnBiome authoring)
@@ -18,7 +19,8 @@ namespace DreamersIncStudio.GAIACollective.Authoring
                 AddComponent(entity, new Biome(authoring));
             }
         }
-    
+
+  
     }
 }
 namespace DreamersIncStudio.GAIACollective
@@ -27,13 +29,20 @@ namespace DreamersIncStudio.GAIACollective
     {
         public uint BiomeID;
         public FixedList512Bytes<SpawnData> SpawnData;
+        public FixedList128Bytes<PackInfo> PacksToSpawn;
         public GaiaSpawnBiome( Authoring.GaiaSpawnBiome gaiaSpawnBiome)
         {
             BiomeID = gaiaSpawnBiome.BiomeID;
             SpawnData = new FixedList512Bytes<SpawnData>();
+            PacksToSpawn = new FixedList128Bytes<PackInfo>();
             foreach (var spawn in gaiaSpawnBiome.SpawnData)
             {
                 SpawnData.Add(spawn);
+            }
+
+            foreach (var pack in gaiaSpawnBiome.PacksToSpawn )
+            {
+                PacksToSpawn.Add(pack);
             }
         }
     }
@@ -85,6 +94,25 @@ namespace DreamersIncStudio.GAIACollective
                 qtySpawned--;
             }
     }
- 
+
+    [System.Serializable]
+    public struct PackInfo
+    {
+        public PackType PackType;
+        public int Qty { get; set; }
+        public int QtyLimit;
+        public bool Satisfied => Qty >= QtyLimit;
+    }
+
+    public enum PackType
+    {
+        Assault,
+        Support,
+        Transport,
+        Scavengers,
+        Recon,
+        Combat,
+        Acquisition
+    }
 
 }
