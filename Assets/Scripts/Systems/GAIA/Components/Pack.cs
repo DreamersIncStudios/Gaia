@@ -19,7 +19,7 @@ namespace DreamersIncStudio.GAIACollective
         public float3 HerdCenter; // Central point for the herd
         public int MemberCount;
         public uint BiomeID;
-
+        public Role Role;
         public static Pack AssaultTeam(uint BiomeID) => new Pack()
         {
             Requirements =  new FixedList128Bytes<PackRole>()
@@ -34,7 +34,8 @@ namespace DreamersIncStudio.GAIACollective
             CohesionFactor = 1.0f,
             SeparationFactor = 2.0f,
             AlignmentFactor = 0.5f,
-            BiomeID = BiomeID
+            BiomeID = BiomeID,
+            Role = Role.Combat
         };
         
         
@@ -52,13 +53,20 @@ namespace DreamersIncStudio.GAIACollective
             CohesionFactor = 1.0f,
             SeparationFactor = 2.0f,
             AlignmentFactor = 0.5f,
-            BiomeID = BiomeID
+            BiomeID = BiomeID,
+            Role = Role.Support
+            
         };
     }
 
     public struct PackMember : IComponentData
     {
         public Entity PackEntity;
+
+        public PackMember(Entity packEntity)
+        {
+          PackEntity = packEntity;
+        }
     }
 
     public struct PackRole

@@ -7,5 +7,6 @@ namespace DreamersIncStudio.GAIACollective
     public readonly partial struct PassportAspect : IAspect
     {
         private readonly RefRO<GaiaLife> life;
+        public Role Role => life.ValueRO.Role;
     }
 }
