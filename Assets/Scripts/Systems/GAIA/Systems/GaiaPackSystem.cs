@@ -46,6 +46,7 @@ namespace DreamersIncStudio.GAIACollective
                 ecb = ecb.CreateCommandBuffer(state.WorldUnmanaged)
                 
             }.Schedule(depends);
+            state.Dependency= depends;
         }
 
     }
@@ -90,7 +91,7 @@ namespace DreamersIncStudio.GAIACollective
                 for (var i = 0; i < pack.Requirements.Length; i++)
                 {
                     var requiredRole = pack.Requirements[i];
-                    if (TryAssignRole(entity, aspect, requiredRole, packEntity, ref pack))
+                    if (TryAssignRole(entity, aspect, ref requiredRole, packEntity, ref pack))
                     {
                         pack.Requirements[i] = requiredRole; // Update the modified role
                     }
@@ -107,19 +108,16 @@ namespace DreamersIncStudio.GAIACollective
         private bool TryAssignRole(
             Entity entity,
             PassportAspect aspect,
-            PackRole role,
+            ref PackRole role,
             Entity packEntity,
             ref Pack pack)
         {
-            if (aspect.Role == role.Role && role.QtyInfo.x > role.QtyInfo.y)
-            {
-                pack.MemberCount++;
-                role.QtyInfo.y++;
-                ecb.AddComponent(entity, new PackMember(packEntity));
-                return true; // Role assignment successful
-            }
+            if (aspect.Role != role.Role || role.QtyInfo.x <= role.QtyInfo.y) return false; // Role assignment failed
+            pack.MemberCount++;
+            role.QtyInfo.y++;
+            ecb.AddComponent(entity, new PackMember(packEntity));
+            return true; // Role assignment successful
 
-            return false; // Role assignment failed
         }
     }
 

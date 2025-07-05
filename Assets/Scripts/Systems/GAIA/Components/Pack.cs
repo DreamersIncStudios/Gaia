@@ -15,7 +15,19 @@ namespace DreamersIncStudio.GAIACollective
         {
             get
             {
-                var count = Requirements.Sum(role => role.QtyInfo.x);
+                if (Requirements.Length == 0)
+                {
+                    Debug.Log("no requirements");
+                    return true;
+                }
+
+                // Manual loop to get the sum of QtyInfo.x
+                var count = 0;
+                for (var i = 0; i < Requirements.Length; i++)
+                {
+                    count += Requirements[i].QtyInfo.x;
+                }
+
                 return count == MemberCount;
             }
         }
