@@ -1,5 +1,5 @@
-
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using Unity.Collections;
 using Unity.Entities;
@@ -11,6 +11,14 @@ namespace DreamersIncStudio.GAIACollective
 {
     public struct Pack : IComponentData
     {
+        public bool Filled
+        {
+            get
+            {
+                var count = Requirements.Sum(role => role.QtyInfo.x);
+                return count == MemberCount;
+            }
+        }
         public FixedList128Bytes<PackRole>  Requirements;
         public Entity LeaderEntity;
         public float CohesionFactor;
@@ -24,12 +32,12 @@ namespace DreamersIncStudio.GAIACollective
         {
             Requirements =  new FixedList128Bytes<PackRole>()
             {
-                new PackRole(Role.Recon, new int2(1,1)),
-                new PackRole(Role.Combat, new int2(1,1)),
-                new PackRole(Role.Scavengers, new int2(1,1)),
-                new PackRole(Role.Transport, new int2(1,1)),
-                new PackRole(Role.Acquisition, new int2(1,1)),
-                new PackRole(Role.Support, new int2(1,1)),
+                new PackRole(Role.Recon, new int2(1,0)),
+                new PackRole(Role.Combat, new int2(1,0)),
+                new PackRole(Role.Scavengers, new int2(1,0)),
+                new PackRole(Role.Transport, new int2(1,0)),
+                new PackRole(Role.Acquisition, new int2(1,0)),
+                new PackRole(Role.Support, new int2(1,0)),
             },
             CohesionFactor = 1.0f,
             SeparationFactor = 2.0f,
@@ -43,12 +51,12 @@ namespace DreamersIncStudio.GAIACollective
         {
             Requirements =  new FixedList128Bytes<PackRole>()
             {
-                new PackRole(Role.Recon, new int2(1,3)),
-                new PackRole(Role.Combat, new int2(1,2)),
+                new PackRole(Role.Recon, new int2(3,0)),
+                new PackRole(Role.Combat, new int2(2,0)),
                 new PackRole(Role.Scavengers, new int2(0,0)),
-                new PackRole(Role.Transport, new int2(1,1)),
+                new PackRole(Role.Transport, new int2(1,0)),
                 new PackRole(Role.Acquisition, new int2(0,0)),
-                new PackRole(Role.Support, new int2(2,3)),
+                new PackRole(Role.Support, new int2(3,0)),
             },
             CohesionFactor = 1.0f,
             SeparationFactor = 2.0f,
@@ -72,12 +80,16 @@ namespace DreamersIncStudio.GAIACollective
     public struct PackRole
     {
         public Role Role;
-        public int2 QtyRange;
+        /// <summary>
+        /// Represents the quantity information for a role: 
+        /// x = required amount, y = currently assigned amount.
+        /// </summary>
+        public int2 QtyInfo; 
 
-        public PackRole(Role role, int2 qtyRange)
+        public PackRole(Role role, int2 qtyInfo)
         {
            Role = role;
-           QtyRange = qtyRange;
+           QtyInfo = qtyInfo;
         }
     }
 
