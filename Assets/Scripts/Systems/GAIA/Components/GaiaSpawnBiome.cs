@@ -2,13 +2,17 @@ using System.Collections.Generic;
 using Systems.Bestiary;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using UnityEngine;
 using Biome = DreamersIncStudio.GAIACollective.GaiaSpawnBiome;
+using Random = UnityEngine.Random;
+
 namespace DreamersIncStudio.GAIACollective.Authoring
 {
     public class GaiaSpawnBiome : MonoBehaviour
     {    
         public uint BiomeID;
+        public int2 LevelRange;
         public List<SpawnData> SpawnData;
         public List<PackInfo> PacksToSpawn;
         public class Baker : Baker<GaiaSpawnBiome>
@@ -28,11 +32,13 @@ namespace DreamersIncStudio.GAIACollective
     public struct GaiaSpawnBiome: IComponentData
     {
         public uint BiomeID;
+        public int2 LevelRange;
         public FixedList512Bytes<SpawnData> SpawnData;
         public FixedList128Bytes<PackInfo> PacksToSpawn;
         public GaiaSpawnBiome( Authoring.GaiaSpawnBiome gaiaSpawnBiome)
         {
             BiomeID = gaiaSpawnBiome.BiomeID;
+            LevelRange = gaiaSpawnBiome.LevelRange;
             SpawnData = new FixedList512Bytes<SpawnData>();
             PacksToSpawn = new FixedList128Bytes<PackInfo>();
             foreach (var spawn in gaiaSpawnBiome.SpawnData)
@@ -60,7 +66,7 @@ namespace DreamersIncStudio.GAIACollective
         private float respawnTime;
         [Range(0,20)]
         public int RespawnInterval;
-            public void Spawn(uint HomeBiomeID)
+            public void Spawn(uint HomeBiomeID, int2 levelRange, uint playerLevel)
             {
                 var entities = new List<Entity>();
                 var cnt = Qty - qtySpawned;
@@ -68,6 +74,7 @@ namespace DreamersIncStudio.GAIACollective
                 {
                     new CharacterBuilder("spawn", out var entity)
                         .WithActiveHour(ActiveHours,HomeBiomeID)
+                        .AtLevel(levelRange,playerLevel)
                         .Build();
                     qtySpawned++;
                     entities.Add(entity);

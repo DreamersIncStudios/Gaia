@@ -21,7 +21,7 @@ namespace DreamersIncStudio.GAIACollective
         {
             RequireForUpdate<RunningTag>();
             RequireForUpdate<GaiaTime>();
-       
+            RequireForUpdate<WorldManager>();
         }
 
 
@@ -32,7 +32,7 @@ namespace DreamersIncStudio.GAIACollective
                 var gaiaEntity = SystemAPI.GetSingletonEntity<GaiaTime>();
                 EntityManager.AddComponentData(gaiaEntity, new GaiaControl(10));
             }
-
+            var worldManager = SystemAPI.GetSingleton<WorldManager>();
             var gaiaTime = SystemAPI.GetSingletonRW<GaiaTime>();
             var gaiaSettings = SystemAPI.GetSingleton<GaiaLightSettings>();
             gaiaTime.ValueRW.UpdateTime(SystemAPI.Time.DeltaTime);
@@ -110,7 +110,7 @@ namespace DreamersIncStudio.GAIACollective
                           spawn.ResetRespawn();
                             break;
                         default:
-                       spawn.Spawn(biome.BiomeID);
+                       spawn.Spawn(biome.BiomeID,biome.LevelRange*(int)worldManager.WorldLevel, worldManager.PlayerLevel);
                        updateHashMap = true;
                             break;
                     }

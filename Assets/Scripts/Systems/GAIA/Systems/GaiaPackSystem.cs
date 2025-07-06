@@ -2,8 +2,10 @@ using System;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Entities.Internal;
+using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
+using static Unity.Entities.SystemAPI;
 
 namespace DreamersIncStudio.GAIACollective
 {
@@ -29,8 +31,8 @@ namespace DreamersIncStudio.GAIACollective
 
         public void OnUpdate(ref SystemState state)
         {
-            var control = SystemAPI.GetSingleton<GaiaControl>();
-            var ecb = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
+            var control = GetSingleton<GaiaControl>();
+            var ecb = GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
             var depends = state.Dependency;
             depends = new FindLeader()
             {
@@ -47,6 +49,39 @@ namespace DreamersIncStudio.GAIACollective
                 
             }.Schedule(depends);
             state.Dependency= depends;
+
+            foreach (var (pack, transform) in Query<Pack, RefRW<LocalTransform>>())
+            {
+                var cohesion = float3.zero;
+                var alignment = float3.zero;
+                var separation = float3.zero;
+                foreach (var memberTransform in Query<LocalTransform>().WithAll<PackMember>())
+                {
+                    if (memberTransform.Position.Equals(transform.ValueRO.Position)) continue;
+                    float3 directionToMember = memberTransform.Position - transform.ValueRO.Position;
+                    float distance = math.length(directionToMember);
+
+                    // Cohesion: Move towards center point
+                    cohesion += memberTransform.Position;
+
+                    // Separation: Avoid other members
+                    if (distance < pack.SeparationFactor)
+                        separation -= directionToMember / distance;
+
+                    // Alignment: Match direction
+                    alignment += memberTransform.Forward();
+                }
+                
+                // Final adjustments
+                cohesion /= pack.MemberCount;
+                alignment = math.normalize(alignment);
+
+                // Update position & direction
+                float3 moveDirection = cohesion + alignment + separation;
+                moveDirection = math.normalize(moveDirection);
+                transform.ValueRW.Position += moveDirection * SystemAPI.Time.DeltaTime;
+
+            }
         }
 
     }
