@@ -18,8 +18,6 @@ namespace DreamersIncStudio.GAIACollective
 
         public void OnCreate(ref SystemState state)
         {
-            state.RequireForUpdate<RunningTag>();
-            state.RequireForUpdate<GaiaTime>();
             packQuery = state.GetEntityQuery(new EntityQueryDesc()
             {
                 All = new ComponentType[]

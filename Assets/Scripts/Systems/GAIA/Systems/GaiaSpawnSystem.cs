@@ -8,6 +8,13 @@ namespace DreamersIncStudio.GAIACollective
 {
     public partial class GaiaUpdateGroup : ComponentSystemGroup
     {
+        protected override void OnCreate()
+        {
+            base.OnCreate();
+            RequireForUpdate<RunningTag>();
+            RequireForUpdate<GaiaTime>();
+            RequireForUpdate<WorldManager>();
+        }
         public GaiaUpdateGroup()
         {
             RateManager = new RateUtils.VariableRateManager(80, true);
@@ -17,12 +24,7 @@ namespace DreamersIncStudio.GAIACollective
     public partial class GaiaSpawnSystem : SystemBase
     {
     
-        protected override void OnCreate()
-        {
-            RequireForUpdate<RunningTag>();
-            RequireForUpdate<GaiaTime>();
-            RequireForUpdate<WorldManager>();
-        }
+    
 
 
         protected override void OnUpdate()

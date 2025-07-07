@@ -12,12 +12,6 @@ namespace DreamersIncStudio.GAIACollective
     [UpdateAfter(typeof(GaiaSpawnSystem))]
     public partial struct GaiaPackMovement : ISystem
     {
-        public void OnCreate(ref SystemState state)
-        {
-
-            state.RequireForUpdate<RunningTag>();
-            state.RequireForUpdate<GaiaTime>();
-        }
 
         public void OnUpdate(ref SystemState state)
         {
