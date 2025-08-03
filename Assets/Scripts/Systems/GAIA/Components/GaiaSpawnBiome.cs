@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DreamersIncStudio.GAIACollective.Streaming.SceneManagement.SectionMetadata;
 using Systems.Bestiary;
 using Unity.Collections;
 using Unity.Entities;
@@ -21,6 +22,7 @@ namespace DreamersIncStudio.GAIACollective.Authoring
             {
                 var entity = GetEntity(TransformUsageFlags.WorldSpace);   
                 AddComponent(entity, new Biome(authoring));
+                AddComponent(entity, new GaiaOperationArea(authoring));
             }
         }
 

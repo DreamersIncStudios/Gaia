@@ -66,10 +66,32 @@ public partial class SubSceneBakingSystem : SystemBase
                 }
             }).Run();
 
+     
+        foreach (var (area,transform, section, entity) in SystemAPI.Query<GaiaOperationArea,LocalToWorld, SceneSection>().WithEntityAccess())
+        {
+            if (section.Section != 0) continue;
+            if (sectionDataDictionary.TryGetValue(section.SceneGUID , out var sectionData))
+            {
+                var positionHashKey = GetSectionID(transform.Position, area.Layer, out float3 center);
+                foreach (var data in sectionData)
+                {
+                    if (data.Layer != area.Layer || !data.Center.Equals(center)) continue;
+                    ecb.AddSharedComponent(entity, new SceneSection
+                    {
+                        SceneGUID = section.SceneGUID,
+                        Section = data.Section
+                    });
+                }
+            }
+            else
+            {
+                AddNewSection(sectionData, area.Layer, transform, entity, ecb, section.SceneGUID);
+            }
+       
+        }
         ecb.Playback(EntityManager);
         ecb.Dispose();
-        
-     //  CleanupBakingComponents();
+
     }
 
     private bool TryUpdateExistingSection(List<SectionData> sectionData, RenderFilterSettings settings,
@@ -79,7 +101,7 @@ public partial class SubSceneBakingSystem : SystemBase
 
         foreach (var data in sectionData)
         {
-            if (data.Layer != settings.Layer || !data.center.Equals(center)) continue;
+            if (data.Layer != settings.Layer || !data.Center.Equals(center)) continue;
             ecb.AddSharedComponent(entity, new SceneSection
             {
                 SceneGUID = sceneGuid,
@@ -100,7 +122,7 @@ public partial class SubSceneBakingSystem : SystemBase
         sectionData.Add(new SectionData
         {
             Layer = settings.Layer,
-            center = center,
+            Center = center,
             Section = newSectionCount
         });
 
@@ -114,6 +136,41 @@ public partial class SubSceneBakingSystem : SystemBase
             Radius = settings.Layer switch
             {
                 6 => 750,
+                9 or 10 or 11=>500,
+                26 => 250,
+                27 => 100,
+                28 => 85,
+                _ => 2250
+            },
+            Center = center
+        });
+    }
+    private void AddNewSection(List<SectionData> sectionData, int Layer,
+        LocalToWorld transform, Entity entity, EntityCommandBuffer ecb, Hash128 sceneGuid)
+    {
+        if (sectionData.IsNullOrEmpty())  
+            sectionData = new List<SectionData>();
+        var positionHashKey = GetSectionID(transform.Position, Layer, out var center);
+        var newSectionCount = sectionData.IsNullOrEmpty() ? 1: sectionData.Count + 1;
+
+        sectionData.Add(new SectionData
+        {
+            Layer = Layer,
+            Center = center,
+            Section = newSectionCount
+        });
+
+        ecb.AddSharedComponent(entity, new SceneSection
+        {
+            SceneGUID = sceneGuid,
+            Section = newSectionCount
+        });
+        ecb.AddComponent(entity, new GaiaOperationArea()
+        {
+            Radius = Layer switch
+            {
+                6 => 750,
+                9 or 10 or 11=>500,
                 26 => 250,
                 27 => 100,
                 28 => 85,
@@ -139,7 +196,7 @@ public partial class SubSceneBakingSystem : SystemBase
 public struct SectionData 
 {
     public int Layer;
-    public float3 center;
+    public float3 Center;
     public int Section;
     
 }

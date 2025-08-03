@@ -2,7 +2,6 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Entities.Serialization;
-using UnityEngine;
 
 
 
@@ -27,7 +26,7 @@ namespace DreamersIncStudio.GAIACollective.Streaming.SceneManagement.SectionMeta
 
             var sectionQuery = SystemAPI.QueryBuilder().WithAll<SectionMetadataSetup>().Build();
 
-            for (int index = 0; index < gaiaEntities.Length; ++index)
+            for (var index = 0; index < gaiaEntities.Length; ++index)
             {
                 var sceneSection = state.EntityManager.GetSharedComponent<SceneSection>(gaiaEntities[index]);
                 var sectionEntity = SerializeUtility.GetSceneSectionEntity(sceneSection.Section, state.EntityManager,

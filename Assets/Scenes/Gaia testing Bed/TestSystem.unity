@@ -327,7 +327,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1519253695}
   - component: {fileID: 1519253694}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: 'Spawn Point 1 '
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -376,7 +376,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1519253693}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -435,5 +435,5 @@ SceneRoots:
   m_Roots:
   - {fileID: 1177896616}
   - {fileID: 1818418375}
-  - {fileID: 1519253695}
   - {fileID: 654156816}
+  - {fileID: 1519253695}

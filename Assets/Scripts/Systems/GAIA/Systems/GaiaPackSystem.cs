@@ -15,7 +15,7 @@ namespace DreamersIncStudio.GAIACollective
     {
         private EntityQuery packQuery;
         private EntityQuery agentsQuery;
-
+        private ComponentLookup<Pack> packLookup;
         public void OnCreate(ref SystemState state)
         {
             packQuery = state.GetEntityQuery(new EntityQueryDesc()
@@ -23,7 +23,7 @@ namespace DreamersIncStudio.GAIACollective
                 All = new ComponentType[]
                     { ComponentType.ReadOnly(typeof(LocalTransform)), ComponentType.ReadWrite(typeof(Pack)) }
             });
-
+            packLookup = state.GetComponentLookup<Pack>(false);
 
         }
 
@@ -35,7 +35,7 @@ namespace DreamersIncStudio.GAIACollective
             depends = new FindLeader()
             {
                 PackEntities = packQuery.ToEntityArray(Allocator.TempJob),
-                PackLookup = state.GetComponentLookup<Pack>(false),
+                PackLookup = packLookup,
                 ecb = ecb.CreateCommandBuffer(state.WorldUnmanaged)
 
             }.Schedule(depends);
