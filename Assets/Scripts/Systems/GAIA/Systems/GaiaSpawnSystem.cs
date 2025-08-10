@@ -50,7 +50,7 @@ namespace DreamersIncStudio.GAIACollective
                           spawn.ResetRespawn();
                             break;
                         default:
-                       spawn.Spawn(biome.BiomeID,biome.LevelRange*(int)worldManager.WorldLevel, worldManager.PlayerLevel);
+                       spawn.Spawn(biome.SpawnRequests,biome.BiomeID,biome.LevelRange*(int)worldManager.WorldLevel, worldManager.PlayerLevel);
                        updateHashMap = true;
                             break;
                     }

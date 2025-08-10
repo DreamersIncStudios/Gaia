@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using DreamersIncStudio.GAIACollective.Streaming.SceneManagement.SectionMetadata;
+using Sirenix.OdinInspector;
 using Systems.Bestiary;
 using Unity.Collections;
 using Unity.Entities;
@@ -37,6 +38,7 @@ namespace DreamersIncStudio.GAIACollective
         public int2 LevelRange;
         public FixedList512Bytes<SpawnData> SpawnData;
         public FixedList128Bytes<PackInfo> PacksToSpawn;
+        public FixedList512Bytes<SpawnRequest> SpawnRequests;
         public GaiaSpawnBiome( Authoring.GaiaSpawnBiome gaiaSpawnBiome)
         {
             BiomeID = gaiaSpawnBiome.BiomeID;
@@ -52,6 +54,7 @@ namespace DreamersIncStudio.GAIACollective
             {
                 PacksToSpawn.Add(pack);
             }
+            SpawnRequests = new FixedList512Bytes<SpawnRequest>();
         }
     }
   
@@ -59,32 +62,33 @@ namespace DreamersIncStudio.GAIACollective
     [System.Serializable]
     public struct SpawnData
     {
+
+
         public uint SpawnID;
         public TimesOfDay ActiveHours;
         public uint Qty;
         private uint qtySpawned;
         public bool IsSatisfied => qtySpawned >= Qty;
             public bool Respawn => respawnTime <= 0.0f;
-        private float respawnTime;
+            [ShowInInspector]private float respawnTime;
         [Range(0,20)]
         public int RespawnInterval;
-            public void Spawn(uint HomeBiomeID, int2 levelRange, uint playerLevel)
+  
+            public void Spawn(FixedList512Bytes<SpawnRequest> spawnRequests,uint HomeBiomeID, int2 levelRange, uint playerLevel)
             {
-                var entities = new List<Entity>();
                 var cnt = Qty - qtySpawned;
-                for (var i = 0; i < cnt; i++)
-                {
-                    new CharacterBuilder("spawn", out var entity)
-                        .WithActiveHour(ActiveHours,HomeBiomeID)
-                        .AtLevel(levelRange,playerLevel)
-                        .Build();
-                    qtySpawned++;
-                    entities.Add(entity);
-                }
+                spawnRequests.Add(new SpawnRequest(SpawnID, HomeBiomeID, levelRange, playerLevel, cnt, ActiveHours));;
                 ResetRespawn();
-         
             }
 
+            public void IncrementSpawned()
+            {
+                qtySpawned++;
+            }
+            public void IncrementSpawned(uint qty)
+            {
+                qtySpawned+= qty;
+            }
             public void ResetRespawn()
             {
                 var interval = 60.0f * RespawnInterval;
@@ -123,5 +127,23 @@ namespace DreamersIncStudio.GAIACollective
         Combat,
         Acquisition
     }
-
+    public struct SpawnRequest
+    {
+        public uint SpawnID;
+        public uint HomeBiomeID;
+        public int2 LevelRange;
+        public uint PlayerLevel;
+        public uint Qty;
+        public TimesOfDay ActiveHours;
+        public SpawnRequest(uint spawnID, uint homeBiomeID, int2 levelRange, uint playerLevel, uint cnt,
+            TimesOfDay activeHours)
+        {
+            SpawnID = spawnID;
+            HomeBiomeID = homeBiomeID;
+            LevelRange = levelRange;
+            PlayerLevel = playerLevel;
+            Qty = cnt;
+            ActiveHours = activeHours;
+        }
+    }
 }
