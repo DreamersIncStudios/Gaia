@@ -1,26 +1,49 @@
+using System.Collections.Generic;
 using DreamersIncStudio.GAIACollective;
 using Systems.Bestiary;
 using Unity.Entities;
-using UnityEngine;
+using Unity.Mathematics;
+using Unity.Transforms;
 
 public partial class GaiaSpawnRequest: SystemBase
 {
     protected override void OnUpdate()
     {
-        Entities.ForEach((ref GaiaSpawnBiome b)=>{
+        var spawnsToProcess = new List<LocalSpawnRequest>();
+        Entities.WithoutBurst().ForEach((ref GaiaSpawnBiome b, in LocalToWorld transform)=>{
             if(b.SpawnRequests.IsEmpty) return;
-            
-            foreach (var request in b.SpawnRequests)
+
+            for (var index = 0; index < b.SpawnRequests.Length; index++)
             {
-                for (var i = 0; i < request.Qty; i++)
+                // ReSharper disable once Unity.BurstLoadingManagedType
+                spawnsToProcess.Add(new LocalSpawnRequest()
                 {
-                    new CharacterBuilder("spawn", out var entity)
-                        .WithActiveHour(request.ActiveHours, request.HomeBiomeID)
-                        .AtLevel(request.LevelRange, request.PlayerLevel)
-                        .Build();
-                }
+                    SpawnRequest = b.SpawnRequests[index],
+                    Position = transform.Position
+                });
+
+                b.SpawnRequests.RemoveAt(index);
             }
-            b.SpawnRequests.Clear();
         }).Run();
+
+        foreach (var request in spawnsToProcess)
+        {
+            for (var i = 0; i < request.SpawnRequest.Qty; i++)
+            {
+                new CharacterBuilder("spawn", out var entity)
+                    .WithActiveHour(request.SpawnRequest.ActiveHours, request.SpawnRequest.HomeBiomeID)
+                    .AtLevel(request.SpawnRequest.LevelRange, request.SpawnRequest.PlayerLevel)
+                    .Build();
+            }
+        }
+    }
+
+    public struct LocalSpawnRequest
+    {
+        public float3 Position;
+        public SpawnRequest SpawnRequest;
     }
 }
+
+
+

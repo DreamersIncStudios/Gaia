@@ -11,24 +11,50 @@ using Random = UnityEngine.Random;
 
 namespace DreamersIncStudio.GAIACollective.Authoring
 {
-    public class GaiaSpawnBiome : MonoBehaviour
+
+    public class GaiaSpawnBiome : MonoBehaviour, ISpawnBiome
     {    
-        public uint BiomeID;
-        public int2 LevelRange;
-        public List<SpawnData> SpawnData;
-        public List<PackInfo> PacksToSpawn;
+        public uint BiomeID=> biomeID;
+        [SerializeField] private uint biomeID;
+        public int2 LevelRange=> levelRange;
+        [SerializeField] private int2 levelRange;
+
+        public List<SpawnData> SpawnData => spawnData;
+        [SerializeField] private List<SpawnData> spawnData;
+
+        public List<PackInfo> PacksToSpawn => packsToSpawn;
+        [SerializeField] private List<PackInfo> packsToSpawn;
+        
         public class Baker : Baker<GaiaSpawnBiome>
         {
             public override void Bake(GaiaSpawnBiome authoring)
             {
                 var entity = GetEntity(TransformUsageFlags.WorldSpace);   
                 AddComponent(entity, new Biome(authoring));
-                AddComponent(entity, new GaiaOperationArea(authoring));
+                var Radius = authoring.gameObject.layer switch
+                {
+                    6 => 750,
+                    9 or 10 or 11 => 500,
+                    26 => 250,
+                    27 => 100,
+                    28 => 85,
+                    _ => 2250
+                };
+                AddComponent(entity, new GaiaOperationArea(authoring.transform.position, Radius));;
             }
         }
 
   
     }
+    
+    public interface ISpawnBiome
+    {
+        public uint BiomeID { get; }
+        public int2 LevelRange{ get; }
+        public List<SpawnData> SpawnData{ get; }
+        public List<PackInfo> PacksToSpawn{ get; }
+    }
+
 }
 namespace DreamersIncStudio.GAIACollective
 {
@@ -39,7 +65,7 @@ namespace DreamersIncStudio.GAIACollective
         public FixedList512Bytes<SpawnData> SpawnData;
         public FixedList128Bytes<PackInfo> PacksToSpawn;
         public FixedList512Bytes<SpawnRequest> SpawnRequests;
-        public GaiaSpawnBiome( Authoring.GaiaSpawnBiome gaiaSpawnBiome)
+        public GaiaSpawnBiome( Authoring.ISpawnBiome gaiaSpawnBiome)
         {
             BiomeID = gaiaSpawnBiome.BiomeID;
             LevelRange = gaiaSpawnBiome.LevelRange;
