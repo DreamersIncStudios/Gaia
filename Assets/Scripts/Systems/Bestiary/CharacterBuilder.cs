@@ -57,5 +57,16 @@ namespace Systems.Bestiary
            manager.AddComponentData(entity, new Stats() { Level = (uint)spawnLevel });
            return this;
         }
+
+        public CharacterBuilder WithParent(Entity requestParentToLink)
+        {
+            if(requestParentToLink == Entity.Null) 
+                return this;
+            manager.AddComponentData(entity, new Parent()
+            {
+                Value = requestParentToLink
+            });
+            return this;
+        }
     }
 }

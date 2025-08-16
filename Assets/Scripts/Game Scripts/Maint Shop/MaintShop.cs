@@ -12,11 +12,9 @@ namespace DreamersIncStudio.Moonshoot
     public struct MaintShopSetup : IComponentData
     {
         public readonly uint NumberOfWorkers;
-        public float3 SpawnPoint;
-        public MaintShopSetup(uint authoringWorkerCount, float3 spawnPoint)
+        public MaintShopSetup(uint authoringWorkerCount)
         {
             NumberOfWorkers = authoringWorkerCount;
-            SpawnPoint = spawnPoint;
         }
     }
 }

@@ -42,20 +42,20 @@ namespace DreamersIncStudio.GAIACollective
                 for (var index = 0; index < biome.SpawnData.Length; index++)
                 {
                     var spawn = biome.SpawnData[index];
-                    switch (spawn)
+                    spawn.Countdown(SystemAPI.Time.DeltaTime);
+                    if (spawn.IsSatisfied)
                     {
-                        case { IsSatisfied: true, Respawn: false }:
-                            break;
-                        case { Respawn: true, IsSatisfied: true }:
-                          spawn.ResetRespawn();
-                            break;
-                        default:
-                       spawn.Spawn(biome.SpawnRequests,biome.BiomeID,biome.LevelRange*(int)worldManager.WorldLevel, worldManager.PlayerLevel);
-                       updateHashMap = true;
-                            break;
+                        if(spawn.Respawn)
+                            spawn.ResetRespawn();
+                    }
+                    else if (spawn.Respawn)
+                    {
+                        spawn.Spawn(ref biome.SpawnRequests,biome.BiomeID,biome.LevelRange*(int)worldManager.WorldLevel, worldManager.PlayerLevel);
+                        Debug.Log("Spawning ");
+                        updateHashMap = true;
                     }
 
-                    spawn.Countdown(SystemAPI.Time.DeltaTime);
+       
                     biome.SpawnData[index] = spawn;
                 }
 

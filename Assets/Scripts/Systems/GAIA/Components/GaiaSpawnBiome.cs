@@ -96,11 +96,11 @@ namespace DreamersIncStudio.GAIACollective
         private uint qtySpawned;
         public bool IsSatisfied => qtySpawned >= Qty;
             public bool Respawn => respawnTime <= 0.0f;
-            [ShowInInspector]private float respawnTime;
+            private float respawnTime;
         [Range(0,20)]
         public int RespawnInterval;
   
-            public void Spawn(FixedList512Bytes<SpawnRequest> spawnRequests,uint HomeBiomeID, int2 levelRange, uint playerLevel)
+            public void Spawn(ref FixedList512Bytes<SpawnRequest> spawnRequests,uint HomeBiomeID, int2 levelRange, uint playerLevel)
             {
                 var cnt = Qty - qtySpawned;
                 spawnRequests.Add(new SpawnRequest(SpawnID, HomeBiomeID, levelRange, playerLevel, cnt, ActiveHours));;

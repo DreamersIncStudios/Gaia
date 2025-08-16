@@ -24,7 +24,6 @@ namespace DreamersIncStudio.Moonshoot
         
         [Range(50, 400)] [SerializeField] private float range = 150;
         [Range(1, 20)] [SerializeField] private uint workerCount = 1;
-        [SerializeField] Transform spawnPoint;
 
         private class MaintShopBaker : Baker<MaintShopAuthoring>
         {
@@ -47,7 +46,7 @@ namespace DreamersIncStudio.Moonshoot
                 {
                     Range = authoring.range,
                 });
-                AddComponent(entity, new MaintShopSetup(authoring.workerCount, authoring.spawnPoint.position));
+                AddComponent(entity, new MaintShopSetup(authoring.workerCount));
 
             }
         }
