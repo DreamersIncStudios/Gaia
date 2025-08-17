@@ -45,6 +45,11 @@ public partial class GaiaSpawnRequest: SystemBase
             }
         }).Run();
 
+        Entities.WithChangeFilter<Child>().ForEach((DynamicBuffer<Child> children, ref MaintShop Shop) =>
+        {
+            Shop.NumberOfWorkers= (uint)children.Length;
+        }).Schedule();
+
         
         foreach (var request in spawnsToProcess)
         {

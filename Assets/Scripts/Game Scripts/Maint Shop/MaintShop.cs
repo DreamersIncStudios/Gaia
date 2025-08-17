@@ -7,14 +7,8 @@ namespace DreamersIncStudio.Moonshoot
     public struct MaintShop : IComponentData
     {
         public float Range;
+        public uint NumberOfWorkers;
+        public uint NumberOfActiveWorkers;
+    }
 
-    }
-    public struct MaintShopSetup : IComponentData
-    {
-        public readonly uint NumberOfWorkers;
-        public MaintShopSetup(uint authoringWorkerCount)
-        {
-            NumberOfWorkers = authoringWorkerCount;
-        }
-    }
 }

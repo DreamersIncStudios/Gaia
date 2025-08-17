@@ -46,7 +46,6 @@ namespace DreamersIncStudio.Moonshoot
                 {
                     Range = authoring.range,
                 });
-                AddComponent(entity, new MaintShopSetup(authoring.workerCount));
 
             }
         }
