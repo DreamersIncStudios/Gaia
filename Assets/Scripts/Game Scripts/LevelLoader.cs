@@ -1,37 +1,32 @@
 using System;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
 using UnityEngine;
 
 namespace DreamersIncStudio.GAIACollective
 {
-    public partial class GaiaUpdateGroup : ComponentSystemGroup
+    [UpdateInGroup(typeof(InitializationSystemGroup))]
+    public partial class LevelLoaderSystem : SystemBase
     {
         protected override void OnCreate()
         {
             base.OnCreate();
-            RequireForUpdate<RunningTag>();
-            RequireForUpdate<GaiaTime>();
             RequireForUpdate<WorldManager>();
+            RequireForUpdate<GaiaTime>();
         }
-        public GaiaUpdateGroup()
-        {
-            RateManager = new RateUtils.VariableRateManager(80, true);
-        }
-    }
-    [UpdateInGroup(typeof(GaiaUpdateGroup))]
-    public partial class GaiaSpawnSystem : SystemBase
-    {
-        
+
         protected override void OnUpdate()
         {
-   
+            if (SystemAPI.HasSingleton<RunningTag>() ) return;
+
+        var singletonEntity = SystemAPI.GetSingletonEntity<WorldManager>();
+
             if (!SystemAPI.TryGetSingleton<GaiaControl>(out _))
             {
                 var gaiaEntity = SystemAPI.GetSingletonEntity<GaiaTime>();
                 EntityManager.AddComponentData(gaiaEntity, new GaiaControl(10));
             }
+
             var worldManager = SystemAPI.GetSingleton<WorldManager>();
 
             #region Spawning
@@ -45,25 +40,30 @@ namespace DreamersIncStudio.GAIACollective
                     spawn.Countdown(SystemAPI.Time.DeltaTime);
                     if (spawn.IsSatisfied)
                     {
-                        if(spawn.Respawn)
+                        if (spawn.Respawn)
                             spawn.ResetRespawn();
                     }
                     else if (spawn.Respawn)
                     {
-                        spawn.Spawn(ref biome.SpawnRequests,biome.BiomeID,biome.LevelRange*(int)worldManager.WorldLevel, worldManager.PlayerLevel);
+                        spawn.Spawn(ref biome.SpawnRequests, biome.BiomeID,
+                            biome.LevelRange * (int)worldManager.WorldLevel,
+                            worldManager.PlayerLevel);
                         Debug.Log("Spawning ");
                         updateHashMap = true;
                     }
 
-       
+
                     biome.SpawnData[index] = spawn;
                 }
 
+                #endregion
+
                 #region Pack Spawn
+
                 for (var i = 0; i < biome.PacksToSpawn.Length; i++)
                 {
                     var packInfo = biome.PacksToSpawn[i];
-                    if(packInfo.Satisfied) continue;
+                    if (packInfo.Satisfied) continue;
                     // ReSharper disable once Unity.BurstFunctionSignatureContainsManagedTypes
                     var baseEntityArch = EntityManager.CreateArchetype(
                         new ComponentType[]
@@ -78,7 +78,7 @@ namespace DreamersIncStudio.GAIACollective
                     {
                         case PackType.Assault:
                             EntityManager.AddComponentData(baseDataEntity, Pack.AssaultTeam(biome.BiomeID));
-                           
+
                             break;
                         case PackType.Support:
                             EntityManager.AddComponentData(baseDataEntity, Pack.Support(biome.BiomeID));
@@ -97,40 +97,15 @@ namespace DreamersIncStudio.GAIACollective
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
+
                     packInfo.Qty++;
                     biome.PacksToSpawn[i] = packInfo;
                 }
             }).Run();
-                #endregion
-                
-          
-            if (!updateHashMap) return;
-            var control = SystemAPI.GetSingleton<GaiaControl>();
-            Entities.ForEach((Entity entity, ref GaiaLife life) =>
-            {
-                if (control.entityMapTesting.IsCreated)
-                {
-                    control.entityMapTesting.Clear();
-                }
-                control.entityMapTesting.Add(life.HomeBiomeID, new AgentInfo(entity));
-            }).Schedule();
-
 
             #endregion
 
+            EntityManager.AddComponent<RunningTag>(singletonEntity);
         }
     }
-
-    public struct AgentInfo
-    {
-       
-        public Entity AgentEntity;
-
-        public AgentInfo( Entity entity = default)
-        {
-            
-            AgentEntity = entity;
-        }
-    }
-
 }

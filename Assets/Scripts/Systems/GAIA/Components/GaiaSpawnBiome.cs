@@ -40,7 +40,7 @@ namespace DreamersIncStudio.GAIACollective.Authoring
                     28 => 85,
                     _ => 2250
                 };
-                AddComponent(entity, new GaiaOperationArea(authoring.transform.position, Radius));;
+                AddComponent(entity, new GaiaOperationArea(authoring.transform.position, Radius));
             }
         }
 

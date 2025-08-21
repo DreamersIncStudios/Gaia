@@ -12,7 +12,7 @@ namespace DreamersIncStudio.GAIACollective
             public override void Bake(GaiaController authoring)
             {
                 var entity = GetEntity(TransformUsageFlags.None);
-                AddComponent<RunningTag>(entity);
+                //AddComponent<RunningTag>(entity);
                 AddComponent(entity,new GaiaLightSettings(authoring.configuration));
                 AddComponent(entity, new GaiaTime(authoring.startTimeOfDay,authoring.configuration));
             }
