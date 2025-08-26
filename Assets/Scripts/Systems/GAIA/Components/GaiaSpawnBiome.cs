@@ -98,9 +98,9 @@ namespace DreamersIncStudio.GAIACollective
     {
 
 
-        public uint SpawnID;
+        public uint SpawnID; // Spawn ID 4 digit number ABCC A is the Race, B is the Role, CC is the ID number.
         public TimesOfDay ActiveHours;
-        public uint Qty;
+        public uint Qty { get; set; }
         private uint qtySpawned;
         public bool IsSatisfied => qtySpawned >= Qty;
             public bool Respawn => respawnTime <= 0.0f;

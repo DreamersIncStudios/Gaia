@@ -31,26 +31,31 @@ namespace DreamersIncStudio.GAIACollective
         {
             var control = GetSingleton<GaiaControl>();
             var ecb = GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
-            // var depends = state.Dependency;
-            // depends = new FindLeader()
-            // {
-            //     PackEntities = packQuery.ToEntityArray(Allocator.TempJob),
-            //     PackLookup = packLookup,
-            //     ecb = ecb.CreateCommandBuffer(state.WorldUnmanaged)
-            //
-            // }.Schedule(depends);
-            // depends = new PackJoinJob()
-            // {
-            //     PackEntities = packQuery.ToEntityArray(Allocator.TempJob),
-            //     PackLookup = state.GetComponentLookup<Pack>(false),
-            //     ecb = ecb.CreateCommandBuffer(state.WorldUnmanaged)
-            //     
-            // }.Schedule(depends);
-            // state.Dependency= depends;
+            var packs = packQuery.ToEntityArray(Allocator.TempJob);
+            var depends = state.Dependency;
+            packLookup.Update(ref state);
+            
+            depends = new FindLeader()
+            {
+                PackEntities = packs,
+                PackLookup = packLookup,
+                ecb = ecb.CreateCommandBuffer(state.WorldUnmanaged)
 
-           
+            }.Schedule(depends);
+            
+            depends = new PackJoinJob()
+            {
+                PackEntities = packs,
+                PackLookup = state.GetComponentLookup<Pack>(false),
+                ecb = ecb.CreateCommandBuffer(state.WorldUnmanaged)
+
+            }.Schedule(depends);
+            
+            depends = packs.Dispose(depends);
+            state.Dependency = depends;
+
+
         }
-
     }
 
     [WithNone(typeof(PackMember))]

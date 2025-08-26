@@ -23,6 +23,13 @@ namespace DreamersIncStudio.GAIACollective
     [UpdateInGroup(typeof(GaiaUpdateGroup))]
     public partial class GaiaSpawnSystem : SystemBase
     {
+        private EntityQuery _gaiaLifeQuery;
+
+        protected override void OnCreate()
+        {
+            base.OnCreate();
+            _gaiaLifeQuery = GetEntityQuery(ComponentType.ReadOnly<GaiaLife>());
+        }
         
         protected override void OnUpdate()
         {
@@ -131,12 +138,18 @@ namespace DreamersIncStudio.GAIACollective
           
             if (!updateHashMap) return;
             var control = SystemAPI.GetSingleton<GaiaControl>();
-            Entities.ForEach((Entity entity, ref GaiaLife life) =>
+            
+            //Todo add check system hashmap size is not equal to entity count
+            
+            if (control.entityMapTesting.IsCreated)
             {
-                if (control.entityMapTesting.IsCreated)
+                if (control.entityMapTesting.Count() != _gaiaLifeQuery.CalculateEntityCount())
                 {
                     control.entityMapTesting.Clear();
                 }
+            }
+            Entities.ForEach((Entity entity, ref GaiaLife life) =>
+            {
                 control.entityMapTesting.Add(life.HomeBiomeID, new AgentInfo(entity));
             }).Schedule();
 
