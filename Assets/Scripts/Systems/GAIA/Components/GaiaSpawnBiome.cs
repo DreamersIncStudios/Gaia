@@ -24,7 +24,8 @@ namespace DreamersIncStudio.GAIACollective.Authoring
 
         public List<PackInfo> PacksToSpawn => packsToSpawn;
         [SerializeField] private List<PackInfo> packsToSpawn;
-        
+        public SpawnScenario SpawnScenario => spawnScenario;
+        [SerializeField] private SpawnScenario spawnScenario;
         public class Baker : Baker<GaiaSpawnBiome>
         {
             public override void Bake(GaiaSpawnBiome authoring)
@@ -53,6 +54,7 @@ namespace DreamersIncStudio.GAIACollective.Authoring
         public int2 LevelRange{ get; }
         public List<SpawnData> SpawnData{ get; }
         public List<PackInfo> PacksToSpawn{ get; }
+        public SpawnScenario SpawnScenario{ get; }
     }
 
 }
@@ -65,12 +67,14 @@ namespace DreamersIncStudio.GAIACollective
         public FixedList512Bytes<SpawnData> SpawnData;
         public FixedList128Bytes<PackInfo> PacksToSpawn;
         public FixedList512Bytes<SpawnRequest> SpawnRequests;
+        public SpawnScenario SpawnScenario;
         public GaiaSpawnBiome( Authoring.ISpawnBiome gaiaSpawnBiome)
         {
             BiomeID = gaiaSpawnBiome.BiomeID;
             LevelRange = gaiaSpawnBiome.LevelRange;
             SpawnData = new FixedList512Bytes<SpawnData>();
             PacksToSpawn = new FixedList128Bytes<PackInfo>();
+            SpawnScenario = gaiaSpawnBiome.SpawnScenario;
             foreach (var spawn in gaiaSpawnBiome.SpawnData)
             {
                 SpawnData.Add(spawn);
@@ -81,7 +85,11 @@ namespace DreamersIncStudio.GAIACollective
                 PacksToSpawn.Add(pack);
             }
             SpawnRequests = new FixedList512Bytes<SpawnRequest>();
+            Manager= Entity.Null;
+            
         }
+
+        public Entity Manager { get; set; }
     }
   
 

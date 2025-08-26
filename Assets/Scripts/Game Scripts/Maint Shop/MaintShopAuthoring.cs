@@ -21,6 +21,8 @@ namespace DreamersIncStudio.Moonshoot
 
         public List<PackInfo> PacksToSpawn => packsToSpawn;
         [SerializeField] private List<PackInfo> packsToSpawn;
+        public SpawnScenario SpawnScenario => spawnScenario;
+        [SerializeField] private SpawnScenario spawnScenario;
         
         [Range(50, 400)] [SerializeField] private float range = 150;
         [Range(1, 20)] [SerializeField] private uint workerCount = 1;
