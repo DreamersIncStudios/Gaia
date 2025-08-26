@@ -46,7 +46,9 @@ namespace DreamersIncStudio.GAIACollective
                 switch (scenario)
                 {
                     case SpawnScenario.DoNotSpawn:
+                        return;
                     case SpawnScenario.BossSpawn when biome.SpawnScenario != SpawnScenario.BossSpawn:
+                        Debug.Log("Functional to be added");
                         return;
                     case SpawnScenario.NormalSpawn:
 
@@ -64,7 +66,6 @@ namespace DreamersIncStudio.GAIACollective
                             {
                                 spawn.Spawn(ref biome.SpawnRequests, biome.BiomeID,
                                     biome.LevelRange * (int)worldManager.WorldLevel, worldManager.PlayerLevel);
-                                Debug.Log("Spawning ");
                                 updateHashMap = true;
                             }
 
@@ -74,6 +75,7 @@ namespace DreamersIncStudio.GAIACollective
                         }
                         break;
                     case SpawnScenario.SpecialSpawn:
+                        Debug.Log("Functional to be added");
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
