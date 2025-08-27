@@ -34,12 +34,15 @@ namespace DreamersIncStudio.GAIACollective
             var packs = packQuery.ToEntityArray(Allocator.TempJob);
             var depends = state.Dependency;
             packLookup.Update(ref state);
+            var cmd = ecb.CreateCommandBuffer(state.WorldUnmanaged);
+            var leaders = new NativeParallelHashSet<Entity>(packs.Length, Allocator.TempJob);
             
             depends = new FindLeader()
             {
                 PackEntities = packs,
                 PackLookup = packLookup,
-                ecb = ecb.CreateCommandBuffer(state.WorldUnmanaged)
+                ecb = cmd,
+                LeadersAssigned = leaders.AsParallelWriter()
 
             }.Schedule(depends);
             
@@ -47,7 +50,8 @@ namespace DreamersIncStudio.GAIACollective
             {
                 PackEntities = packs,
                 PackLookup = packLookup,
-                ecb = ecb.CreateCommandBuffer(state.WorldUnmanaged)
+                ecb = cmd,
+                LeadersAssigned = leaders
 
             }.Schedule(depends);
             
@@ -65,6 +69,7 @@ namespace DreamersIncStudio.GAIACollective
         public EntityCommandBuffer ecb;
         public NativeArray<Entity> PackEntities;
         public ComponentLookup<Pack> PackLookup;
+        public NativeParallelHashSet<Entity>.ParallelWriter LeadersAssigned;
 
         private void Execute(Entity entity, [ChunkIndexInQuery] int chunkIndex, PassportAspect aspect)
         {
@@ -77,6 +82,7 @@ namespace DreamersIncStudio.GAIACollective
                 pack.MemberCount++;
                 ecb.AddComponent(entity, new PackMember(packEntity));
                 PackLookup[packEntity] = pack;
+                LeadersAssigned.Add(entity);
             }
         }
     }
@@ -87,9 +93,13 @@ namespace DreamersIncStudio.GAIACollective
         public EntityCommandBuffer ecb;
         public NativeArray<Entity> PackEntities;
         public ComponentLookup<Pack> PackLookup;
+        public NativeParallelHashSet<Entity> LeadersAssigned;
 
         private void Execute(Entity entity, [ChunkIndexInQuery] int chunkIndex, PassportAspect aspect)
         {
+            // Skip entities that have been assigned as leaders this frame
+            if (LeadersAssigned.Contains(entity)) return;
+
             foreach (var packEntity in PackEntities)
             {
                 var pack = PackLookup[packEntity];
@@ -107,6 +117,8 @@ namespace DreamersIncStudio.GAIACollective
                 PackLookup[packEntity] = pack; // Save the updated pack
             }
         }
+
+
 
         /// <summary>
         /// Attempts to assign the given entity to the provided role in the pack.

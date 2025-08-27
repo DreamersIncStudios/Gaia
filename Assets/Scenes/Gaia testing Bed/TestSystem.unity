@@ -351,8 +351,10 @@ MonoBehaviour:
     x: 0
     y: 0
   spawnData:
-  - SpawnID: 0
+  - SpawnScenario: 0
+    SpawnID: 0
     ActiveHours: 1
+    Qty: 0
     RespawnInterval: 9
   packsToSpawn: []
   spawnScenario: 0
@@ -407,11 +409,17 @@ MonoBehaviour:
     x: 0
     y: 0
   spawnData:
-  - SpawnID: 0
+  - SpawnScenario: 1
+    SpawnID: 0
     ActiveHours: 1
-    RespawnInterval: 15
+    Qty: 20
+    RespawnInterval: 9
+  - SpawnScenario: 2
+    SpawnID: 10
+    ActiveHours: 1
+    Qty: 5
+    RespawnInterval: 20
   packsToSpawn: []
-  spawnScenario: 0
 --- !u!4 &1519253695
 Transform:
   m_ObjectHideFlags: 0
@@ -486,7 +494,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05b1b327a9d80b245bf1c7e6b8038546, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SpawnScenario: 1
+  SpawnScenario: 2
   Bounds:
     x: 300
     y: 300
