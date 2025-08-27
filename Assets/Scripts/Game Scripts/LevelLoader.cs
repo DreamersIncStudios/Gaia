@@ -30,13 +30,20 @@ namespace DreamersIncStudio.GAIACollective
             var worldManager = SystemAPI.GetSingleton<WorldManager>();
 
             #region Spawning
+            var levelManager = SystemAPI.GetComponentLookup<GaiaLevelManager>(true);
 
             var updateHashMap = false;
             Entities.WithStructuralChanges().ForEach((ref GaiaSpawnBiome biome) =>
             {
+                if(biome.Manager == Entity.Null) return;
+                var scenario = levelManager[biome.Manager].SpawnScenario;
+                if(scenario == SpawnScenario.DoNotSpawn) return;
+
                 for (var index = 0; index < biome.SpawnData.Length; index++)
                 {
                     var spawn = biome.SpawnData[index];
+                    if(spawn.SpawnScenario != scenario) continue;
+
                     spawn.Countdown(SystemAPI.Time.DeltaTime);
                     if (spawn.IsSatisfied)
                     {

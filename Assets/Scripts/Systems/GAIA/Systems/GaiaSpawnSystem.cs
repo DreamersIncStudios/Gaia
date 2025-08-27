@@ -49,44 +49,32 @@ namespace DreamersIncStudio.GAIACollective
             {
                 if(biome.Manager == Entity.Null) return;
                 var scenario = levelManager[biome.Manager].SpawnScenario;
-                
-                switch (scenario)
+                if(scenario == SpawnScenario.DoNotSpawn) return;
+                    for (var index = 0; index < biome.SpawnData.Length; index++)
                 {
-                    case SpawnScenario.DoNotSpawn:
-                        return;
-                    case SpawnScenario.BossSpawn when biome.SpawnScenario != SpawnScenario.BossSpawn:
-                        Debug.Log("Functional to be added");
-                        return;
-                    case SpawnScenario.NormalSpawn:
+                    
+                    var spawn = biome.SpawnData[index];
+                    if(spawn.SpawnScenario != scenario) continue;
+                    
+                    spawn.Countdown(SystemAPI.Time.DeltaTime);
+                    if (spawn.IsSatisfied)
+                    {
+                        if (spawn.Respawn)
+                            spawn.ResetRespawn();
+                    }
+                    else if (spawn.Respawn)
+                    {
+                        spawn.Spawn(ref biome.SpawnRequests, biome.BiomeID,
+                            biome.LevelRange * (int)worldManager.WorldLevel, worldManager.PlayerLevel);
+                        updateHashMap = true;
+                    }
 
 
-                        for (var index = 0; index < biome.SpawnData.Length; index++)
-                        {
-                            var spawn = biome.SpawnData[index];
-                            spawn.Countdown(SystemAPI.Time.DeltaTime);
-                            if (spawn.IsSatisfied)
-                            {
-                                if (spawn.Respawn)
-                                    spawn.ResetRespawn();
-                            }
-                            else if (spawn.Respawn)
-                            {
-                                spawn.Spawn(ref biome.SpawnRequests, biome.BiomeID,
-                                    biome.LevelRange * (int)worldManager.WorldLevel, worldManager.PlayerLevel);
-                                updateHashMap = true;
-                            }
+                    biome.SpawnData[index] = spawn;
 
-
-                            biome.SpawnData[index] = spawn;
-                            
-                        }
-                        break;
-                    case SpawnScenario.SpecialSpawn:
-                        Debug.Log("Functional to be added");
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
                 }
+
+
 
                 #region Pack Spawn
 
@@ -138,22 +126,19 @@ namespace DreamersIncStudio.GAIACollective
           
             if (!updateHashMap) return;
             var control = SystemAPI.GetSingleton<GaiaControl>();
-            
-            //Todo add check system hashmap size is not equal to entity count
-            
-            if (control.entityMapTesting.IsCreated)
+
+
+            if (!control.entityMapTesting.IsCreated) return;
+            if (control.entityMapTesting.Count() != _gaiaLifeQuery.CalculateEntityCount())
             {
-                if (control.entityMapTesting.Count() != _gaiaLifeQuery.CalculateEntityCount())
-                {
-                    control.entityMapTesting.Clear();
-                }
+                control.entityMapTesting.Clear();
             }
+
             Entities.ForEach((Entity entity, ref GaiaLife life) =>
             {
                 control.entityMapTesting.Add(life.HomeBiomeID, new AgentInfo(entity));
             }).Schedule();
-
-
+Debug.Log(control.entityMapTesting.Count());
             #endregion
 
         }

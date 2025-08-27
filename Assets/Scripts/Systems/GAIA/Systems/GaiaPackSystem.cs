@@ -46,7 +46,7 @@ namespace DreamersIncStudio.GAIACollective
             depends = new PackJoinJob()
             {
                 PackEntities = packs,
-                PackLookup = state.GetComponentLookup<Pack>(false),
+                PackLookup = packLookup,
                 ecb = ecb.CreateCommandBuffer(state.WorldUnmanaged)
 
             }.Schedule(depends);

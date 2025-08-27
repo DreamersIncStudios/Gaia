@@ -353,9 +353,9 @@ MonoBehaviour:
   spawnData:
   - SpawnID: 0
     ActiveHours: 1
-    Qty: 20
     RespawnInterval: 9
   packsToSpawn: []
+  spawnScenario: 0
   range: 150
   workerCount: 1
 --- !u!4 &1215054400
@@ -409,9 +409,9 @@ MonoBehaviour:
   spawnData:
   - SpawnID: 0
     ActiveHours: 1
-    Qty: 60
     RespawnInterval: 15
   packsToSpawn: []
+  spawnScenario: 0
 --- !u!4 &1519253695
 Transform:
   m_ObjectHideFlags: 0
@@ -437,6 +437,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1818418375}
   - component: {fileID: 1818418376}
+  - component: {fileID: 1818418377}
   m_Layer: 0
   m_Name: GAIA Controller
   m_TagString: Untagged
@@ -473,6 +474,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DreamersIncStudio.GAIACollective.GaiaController
   configuration: {fileID: 11400000, guid: 47266f20c7afb8745a761fade8119998, type: 2}
   startTimeOfDay: 12
+--- !u!114 &1818418377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1818418374}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05b1b327a9d80b245bf1c7e6b8038546, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SpawnScenario: 1
+  Bounds:
+    x: 300
+    y: 300
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

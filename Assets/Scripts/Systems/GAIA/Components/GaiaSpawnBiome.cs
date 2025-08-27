@@ -24,8 +24,6 @@ namespace DreamersIncStudio.GAIACollective.Authoring
 
         public List<PackInfo> PacksToSpawn => packsToSpawn;
         [SerializeField] private List<PackInfo> packsToSpawn;
-        public SpawnScenario SpawnScenario => spawnScenario;
-        [SerializeField] private SpawnScenario spawnScenario;
         public class Baker : Baker<GaiaSpawnBiome>
         {
             public override void Bake(GaiaSpawnBiome authoring)
@@ -54,7 +52,6 @@ namespace DreamersIncStudio.GAIACollective.Authoring
         public int2 LevelRange{ get; }
         public List<SpawnData> SpawnData{ get; }
         public List<PackInfo> PacksToSpawn{ get; }
-        public SpawnScenario SpawnScenario{ get; }
     }
 
 }
@@ -67,14 +64,12 @@ namespace DreamersIncStudio.GAIACollective
         public FixedList512Bytes<SpawnData> SpawnData;
         public FixedList128Bytes<PackInfo> PacksToSpawn;
         public FixedList512Bytes<SpawnRequest> SpawnRequests;
-        public SpawnScenario SpawnScenario;
         public GaiaSpawnBiome( Authoring.ISpawnBiome gaiaSpawnBiome)
         {
             BiomeID = gaiaSpawnBiome.BiomeID;
             LevelRange = gaiaSpawnBiome.LevelRange;
             SpawnData = new FixedList512Bytes<SpawnData>();
             PacksToSpawn = new FixedList128Bytes<PackInfo>();
-            SpawnScenario = gaiaSpawnBiome.SpawnScenario;
             foreach (var spawn in gaiaSpawnBiome.SpawnData)
             {
                 SpawnData.Add(spawn);
@@ -96,16 +91,17 @@ namespace DreamersIncStudio.GAIACollective
     [System.Serializable]
     public struct SpawnData
     {
+        public SpawnScenario SpawnScenario;
 
 
         public uint SpawnID; // Spawn ID 4 digit number ABCC A is the Race, B is the Role, CC is the ID number.
         public TimesOfDay ActiveHours;
-        public uint Qty { get; set; }
+        [Range(1,25)]public uint Qty;
         private uint qtySpawned;
         public bool IsSatisfied => qtySpawned >= Qty;
             public bool Respawn => respawnTime <= 0.0f;
             private float respawnTime;
-        [Range(0,20)]
+        [Range(0,30)]
         public int RespawnInterval;
   
             public void Spawn(ref FixedList512Bytes<SpawnRequest> spawnRequests,uint HomeBiomeID, int2 levelRange, uint playerLevel)
