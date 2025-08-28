@@ -123,22 +123,22 @@ namespace DreamersIncStudio.GAIACollective
             }).Run();
               
             #endregion
-          
-            if (!updateHashMap) return;
-            var control = SystemAPI.GetSingleton<GaiaControl>();
-
-
-            if (!control.entityMapTesting.IsCreated) return;
-            if (control.entityMapTesting.Count() != _gaiaLifeQuery.CalculateEntityCount())
-            {
-                control.entityMapTesting.Clear();
-            }
-
-            Entities.ForEach((Entity entity, ref GaiaLife life) =>
-            {
-                control.entityMapTesting.Add(life.HomeBiomeID, new AgentInfo(entity));
-            }).Schedule();
-Debug.Log(control.entityMapTesting.Count());
+//           
+//             if (!updateHashMap) return;
+//             var control = SystemAPI.GetSingleton<GaiaControl>();
+//
+//
+//             if (!control.entityMapTesting.IsCreated) return;
+//             if (control.entityMapTesting.Count() != _gaiaLifeQuery.CalculateEntityCount())
+//             {
+//                 control.entityMapTesting.Clear();
+//             }
+//
+//             Entities.ForEach((Entity entity, ref GaiaLife life) =>
+//             {
+//                 control.entityMapTesting.Add(life.HomeBiomeID, new AgentInfo(entity));
+//             }).Schedule();
+// Debug.Log(control.entityMapTesting.Count());
             #endregion
 
         }

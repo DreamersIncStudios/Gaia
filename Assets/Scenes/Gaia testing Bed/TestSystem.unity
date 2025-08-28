@@ -20,7 +20,7 @@ RenderSettings:
   m_FogDensity: 0.01
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.7490196, g: 0.7411765, b: 0.68235296, a: 0}
+  m_AmbientSkyColor: {r: 0.88996667, g: 0.54434097, b: 0.40577284, a: 0}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
@@ -346,7 +346,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f752ba6a3ec7854b8a3e200770fa09a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  biomeID: 0
+  biomeID: 10
   levelRange:
     x: 0
     y: 0
@@ -354,7 +354,7 @@ MonoBehaviour:
   - SpawnScenario: 0
     SpawnID: 0
     ActiveHours: 1
-    Qty: 0
+    Qty: 10
     RespawnInterval: 9
   packsToSpawn: []
   spawnScenario: 0
@@ -414,7 +414,7 @@ MonoBehaviour:
     ActiveHours: 1
     Qty: 20
     RespawnInterval: 9
-  - SpawnScenario: 2
+  - SpawnScenario: 0
     SpawnID: 10
     ActiveHours: 1
     Qty: 5
