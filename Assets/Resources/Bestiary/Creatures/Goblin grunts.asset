@@ -9,14 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 86d32022f830472a88c376f541f9164b, type: 3}
-  m_Name: testing
+  m_Script: {fileID: 11500000, guid: c331c9ba0d36b7741951d58df0f7100f, type: 3}
+  m_Name: Goblin grunts
   m_EditorClassIdentifier: 
-  biomeID: 0
-  spawnData:
-  - SpawnScenario: 2
-    SpawnID: 3
-    ActiveHours: 5
-    Qty: 1
-    RespawnInterval: 15
-  packsToSpawn: []
+  creatureID: 2
+  Name: Goblins
+  ClassLevel: 0
+  ActiveTimesOfDay: 0
+  Role: 2

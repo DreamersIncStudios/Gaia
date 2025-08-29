@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DreamersInc.BestiarySystem;
 using DreamersIncStudio.GAIACollective;
 using DreamersIncStudio.Moonshoot;
 using Systems.Bestiary;
@@ -55,11 +56,10 @@ public partial class GaiaSpawnRequest: SystemBase
         {
             for (var i = 0; i < request.SpawnRequest.Qty; i++)
             {
-                new CharacterBuilder("spawn", out var entity)
-                    .WithActiveHour(request.SpawnRequest.ActiveHours, request.SpawnRequest.HomeBiomeID)
-                    .AtLevel(request.SpawnRequest.LevelRange, request.SpawnRequest.PlayerLevel)
-                    .WithParent(request.ParentToLink)
-                    .Build();
+              BestiaryDB.Spawn(request.SpawnRequest.SpawnID,
+                  request.SpawnRequest.HomeBiomeID,
+                  request.SpawnRequest.PlayerLevel,
+                  request.ParentToLink);
             }
         }
     }

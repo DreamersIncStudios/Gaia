@@ -20,7 +20,7 @@ RenderSettings:
   m_FogDensity: 0.01
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.88996667, g: 0.54434097, b: 0.40577284, a: 0}
+  m_AmbientSkyColor: {r: 0.7490196, g: 0.7411765, b: 0.68235296, a: 0}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
@@ -352,7 +352,7 @@ MonoBehaviour:
     y: 0
   spawnData:
   - SpawnScenario: 0
-    SpawnID: 0
+    SpawnID: 1
     ActiveHours: 1
     Qty: 10
     RespawnInterval: 9
@@ -410,12 +410,12 @@ MonoBehaviour:
     y: 0
   spawnData:
   - SpawnScenario: 1
-    SpawnID: 0
+    SpawnID: 1
     ActiveHours: 1
     Qty: 20
     RespawnInterval: 9
   - SpawnScenario: 0
-    SpawnID: 10
+    SpawnID: 1
     ActiveHours: 1
     Qty: 5
     RespawnInterval: 20
