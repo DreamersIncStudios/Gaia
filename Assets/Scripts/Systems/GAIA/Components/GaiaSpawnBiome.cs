@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using DreamersIncStudio.GAIACollective.Streaming.SceneManagement.SectionMetadata;
 using Sirenix.OdinInspector;
@@ -142,9 +143,26 @@ namespace DreamersIncStudio.GAIACollective
     public struct PackInfo
     {
         public PackType PackType;
+        public Size Size;
+        public bool Created{get; set; }
         public int Qty { get; set; }
-        public int QtyLimit;
+
+        public int QtyLimit => Size switch
+                {
+                    Size.small => 1,
+                    Size.medium => 2,
+                    Size.large => 3,
+                    Size.huge => 6,
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+            
+        
         public bool Satisfied => Qty >= QtyLimit;
+    }
+
+    public enum Size
+    {
+        small, medium, large, huge
     }
 
     public enum PackType

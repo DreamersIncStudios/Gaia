@@ -19,4 +19,11 @@ MonoBehaviour:
     ActiveHours: 5
     Qty: 1
     RespawnInterval: 15
-  packsToSpawn: []
+  - SpawnScenario: 2
+    SpawnID: 2
+    ActiveHours: 5
+    Qty: 4
+    RespawnInterval: 10
+  packsToSpawn:
+  - PackType: 0
+    Size: 1

@@ -23,15 +23,15 @@ namespace DreamersIncStudio.GAIACollective
             var em = World.DefaultGameObjectInjectionWorld.EntityManager;
             var query = em.CreateEntityQuery(typeof(GaiaSpawnBiome));
             var biomeEntities = query.ToEntityArray(Allocator.Temp);
-           Debug.Log(biomeEntities.Length);
             foreach (var entity in biomeEntities)
             {
                 var biome = em.GetComponentData<GaiaSpawnBiome>(entity);
                 if (biome.BiomeID != BiomeID) continue;
                 foreach (var spawn in SpawnData)
                     biome.SpawnData.Add(spawn);
+                foreach (var pack in PacksToSpawn)
+                    biome.PacksToSpawn.Add(pack);
                 em.SetComponentData(entity, biome);
-                Debug.Log("Added Spawn Data");
             }
             
             biomeEntities.Dispose();

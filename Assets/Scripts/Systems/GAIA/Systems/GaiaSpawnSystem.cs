@@ -45,7 +45,7 @@ namespace DreamersIncStudio.GAIACollective
 
             var levelManager = SystemAPI.GetComponentLookup<GaiaLevelManager>(true);
             var updateHashMap = false;
-            Entities.WithStructuralChanges().ForEach((ref GaiaSpawnBiome biome) =>
+            Entities.WithStructuralChanges().ForEach((ref GaiaSpawnBiome biome, in LocalToWorld transform) =>
             {
                 if(biome.Manager == Entity.Null) return;
                 var scenario = levelManager[biome.Manager].SpawnScenario;
@@ -81,7 +81,8 @@ namespace DreamersIncStudio.GAIACollective
                 for (var i = 0; i < biome.PacksToSpawn.Length; i++)
                 {
                     var packInfo = biome.PacksToSpawn[i];
-                    if (packInfo.Satisfied) continue;
+                    if (packInfo.Created) continue;
+                    
                     // ReSharper disable once Unity.BurstFunctionSignatureContainsManagedTypes
                     var baseEntityArch = EntityManager.CreateArchetype(
                         new ComponentType[]
@@ -91,15 +92,20 @@ namespace DreamersIncStudio.GAIACollective
                         }
                     );
                     var baseDataEntity = EntityManager.CreateEntity(baseEntityArch);
-
+                    EntityManager.SetName(baseDataEntity, packInfo.PackType.ToString());
+                    EntityManager.SetComponentData(baseDataEntity, new LocalTransform()
+                    {
+                        Position = transform.Position,
+                        Scale = 1
+                    });
                     switch (packInfo.PackType)
                     {
                         case PackType.Assault:
-                            EntityManager.AddComponentData(baseDataEntity, Pack.AssaultTeam(biome.BiomeID));
+                            EntityManager.AddComponentData(baseDataEntity, Pack.AssaultTeam(biome.BiomeID, packInfo.Size));
 
                             break;
                         case PackType.Support:
-                            EntityManager.AddComponentData(baseDataEntity, Pack.Support(biome.BiomeID));
+                            EntityManager.AddComponentData(baseDataEntity, Pack.Support(biome.BiomeID, packInfo.Size));
 
                             break;
                         case PackType.Transport:
@@ -117,9 +123,10 @@ namespace DreamersIncStudio.GAIACollective
                     }
 
                     packInfo.Qty++;
+                    packInfo.Created = true;
                     biome.PacksToSpawn[i] = packInfo;
                 }
-
+                
             }).Run();
               
             #endregion
