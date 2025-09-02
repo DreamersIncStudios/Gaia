@@ -2,6 +2,7 @@ using System;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Entities.Internal;
+using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
@@ -37,35 +38,55 @@ namespace DreamersIncStudio.GAIACollective
             packListLookup = state.GetBufferLookup<PackList>(false);
         }
 
+   
         public void OnUpdate(ref SystemState state)
         {
             var ecb = GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
             var packs = packQuery.ToEntityArray(Allocator.TempJob);
-            var packMember = packMemberQuery.ToComponentDataArray<PackMember>(Allocator.TempJob);
-            var PackMembersTransform = packMemberQuery.ToComponentDataArray<LocalToWorld>(Allocator.TempJob);
             var depends = state.Dependency;
             packLookup.Update(ref state);
             transformLookup.Update(ref state);
-            packListLookup.Update(ref state);
+            var packMember = packMemberQuery.ToComponentDataArray<PackMember>(Allocator.TempJob);
+            var packMembersTransform = packMemberQuery.ToComponentDataArray<LocalToWorld>(Allocator.TempJob);
             var cmd = ecb.CreateCommandBuffer(state.WorldUnmanaged);
             var leaders = new NativeParallelHashSet<Entity>(packs.Length, Allocator.TempJob);
 
-            depends = new FindLeader()
+            // Combinator phase (score best leader per pack)
+            var bestScores = new NativeArray<float>(packs.Length, Allocator.TempJob);
+            var bestLeaders = new NativeArray<Entity>(packs.Length, Allocator.TempJob);
+
+            // Initialize local scratch arrays on main thread
+            for (int i = 0; i < packs.Length; i++)
+            {
+                bestScores[i] = float.NegativeInfinity;
+                bestLeaders[i] = Entity.Null;
+            }
+
+            depends = new ScoreLeaders
             {
                 PackEntities = packs,
                 PackLookup = packLookup,
-                PackListLookup = packListLookup,
-                ecb = cmd,
-                LeadersAssigned = leaders.AsParallelWriter()
-
+                TransformLookupRO = transformLookup,
+                BestScores = bestScores,
+                BestLeaders = bestLeaders
             }.Schedule(depends);
 
+            // Commit winners (apply chosen leader to packs + mark as assigned)
+            depends = new ApplyLeaders
+            {
+                PackEntities = packs,
+                PackLookup = packLookup,
+                BestLeaders = bestLeaders,
+                CommandBuffer = cmd,
+                LeadersAssigned = leaders
+            }.Schedule(depends);
+
+            // Remaining agents can join non-leader roles
             depends = new PackJoinJob()
             {
                 PackEntities = packs,
                 PackLookup = packLookup,
-                PackListLookup = packListLookup,
-                ecb = cmd,
+                ECB = cmd,
                 LeadersAssigned = leaders
 
             }.Schedule(depends);
@@ -74,60 +95,100 @@ namespace DreamersIncStudio.GAIACollective
             {
                 FindTransform = transformLookup
             }.Schedule(depends);
-            
             depends = new UpdatePackCenter()
             {
                 PackMembersTransform = transformLookup
                 
             }.Schedule(depends);
-            
-            depends = packMember.Dispose(depends);
-            depends = PackMembersTransform.Dispose(depends);
             depends = packs.Dispose(depends);
+            depends = bestScores.Dispose(depends);
+            depends = bestLeaders.Dispose(depends);
+            depends = leaders.Dispose(depends);
+            depends = packMember.Dispose(depends);
+            depends = packMembersTransform.Dispose(depends);
             state.Dependency = depends;
-
-
         }
 
-
+     
         [WithNone(typeof(PackMember))]
-
-        partial struct FindLeader : IJobEntity
+        partial struct ScoreLeaders : IJobEntity
         {
-            public EntityCommandBuffer ecb;
             public NativeArray<Entity> PackEntities;
             public ComponentLookup<Pack> PackLookup;
-            public BufferLookup<PackList> PackListLookup;
-            public NativeParallelHashSet<Entity>.ParallelWriter LeadersAssigned;
+            [ReadOnly] public ComponentLookup<LocalToWorld> TransformLookupRO;
 
-            private void Execute(Entity entity, [ChunkIndexInQuery] int chunkIndex, PassportAspect aspect)
+            // Scratch outputs (per-pack)
+            public NativeArray<float> BestScores;
+            public NativeArray<Entity> BestLeaders;
+
+            private void Execute(Entity candidate, in LocalToWorld transfom, PassportAspect aspect)
             {
-                foreach (var packEntity in PackEntities)
+                // Candidate must be able to lead its matching pack role
+                for (int i = 0; i < PackEntities.Length; i++)
                 {
+                    var packEntity = PackEntities[i];
                     var pack = PackLookup[packEntity];
                     if (pack.LeaderEntity != Entity.Null) continue;
                     if (pack.Role != aspect.Role) continue;
-                    pack.LeaderEntity = entity;
+                    
+                    //  scoring
+                    var distance = math.distance(transfom.Position, TransformLookupRO[packEntity].Position);
+                    var distanceScore = DistanceInverse(distance, 0.001f); // Avoid div-by-zero
+                    var levelScore = LevelScore(aspect.Level);
+
+                    var score = CombineWeighted(distanceScore, 0.7f, levelScore, 0.3f);
+
+                    // Keep best per pack (single-thread scheduled => no atomics needed)
+                    if (!(score > BestScores[i])) continue;
+                    BestScores[i] = score;
+                    BestLeaders[i] = candidate;
+                }
+            }
+
+      
+            private static float DistanceInverse(float d, float epsilon) => 1f / math.max(d, epsilon);
+            private static float LevelScore(int level) => level; // Identity; replace with normalization if needed
+            private static float CombineWeighted(float a, float wa, float b, float wb) => a * wa + b * wb;
+        }
+
+        private struct ApplyLeaders : IJob
+        {
+            public NativeArray<Entity> PackEntities;
+            public ComponentLookup<Pack> PackLookup;
+            [ReadOnly] public NativeArray<Entity> BestLeaders;
+            public EntityCommandBuffer CommandBuffer;
+            public NativeParallelHashSet<Entity> LeadersAssigned;
+
+            public void Execute()
+            {
+                for (int i = 0; i < PackEntities.Length; i++)
+                {
+                    var packEntity = PackEntities[i];
+                    var pack = PackLookup[packEntity];
+                    if (pack.LeaderEntity != Entity.Null) continue;
+
+                    var winner = BestLeaders[i];
+                    if (winner == Entity.Null) continue;
+
+                    pack.LeaderEntity = winner;
                     pack.MemberCount++;
-                    ecb.AddComponent(entity, new PackMember(packEntity));
+                    CommandBuffer.AddComponent(winner, new PackMember(packEntity));
                     PackLookup[packEntity] = pack;
-                    PackListLookup[packEntity].Add(new PackList(entity, aspect.Role));
-                    LeadersAssigned.Add(entity);
+                    LeadersAssigned.Add(winner);
                 }
             }
         }
 
+
         [WithNone(typeof(PackMember))]
-        partial struct PackJoinJob : IJobEntity
+        private partial struct PackJoinJob : IJobEntity
         {
-            public EntityCommandBuffer ecb;
+            public EntityCommandBuffer ECB;
             public NativeArray<Entity> PackEntities;
             public ComponentLookup<Pack> PackLookup;
-            public BufferLookup<PackList> PackListLookup;
-            
             public NativeParallelHashSet<Entity> LeadersAssigned;
 
-            private void Execute(Entity entity, [ChunkIndexInQuery] int chunkIndex, PassportAspect aspect)
+            private void Execute(Entity entity, PassportAspect aspect)
             {
                 // Skip entities that have been assigned as leaders this frame
                 if (LeadersAssigned.Contains(entity)) return;
@@ -147,16 +208,9 @@ namespace DreamersIncStudio.GAIACollective
                     }
 
                     PackLookup[packEntity] = pack; // Save the updated pack
-                    PackListLookup[packEntity].Add(new PackList(entity, aspect.Role));
                 }
             }
 
-
-
-            /// <summary>
-            /// Attempts to assign the given entity to the provided role in the pack.
-            /// </summary>
-            /// <returns>True if the role was successfully assigned, false otherwise.</returns>
             private bool TryAssignRole(
                 Entity entity,
                 PassportAspect aspect,
@@ -165,15 +219,13 @@ namespace DreamersIncStudio.GAIACollective
                 ref Pack pack)
             {
                 if (aspect.Role != role.Role || role.QtyInfo.x <= role.QtyInfo.y)
-                    return false; // Role assignment failed
+                    return false;
                 pack.MemberCount++;
                 role.QtyInfo.y++;
-                ecb.AddComponent(entity, new PackMember(packEntity));
-                return true; // Role assignment successful
-
+                ECB.AddComponent(entity, new PackMember(packEntity));
+                return true;
             }
         }
-        
         public partial struct UpdatePackPositions : IJobEntity
         {
             [ReadOnly] public ComponentLookup<LocalToWorld> FindTransform;
