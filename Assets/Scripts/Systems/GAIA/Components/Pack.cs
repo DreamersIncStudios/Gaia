@@ -124,6 +124,19 @@ namespace DreamersIncStudio.GAIACollective
         }
     }
 
+    [InternalBufferCapacity(0)]
+    public struct PackList : IBufferElementData
+    {
+        public Entity PackMember;
+        public Role MemberRole;
+
+        public PackList(Entity entity, Role Role)
+        {
+            PackMember = entity;
+            MemberRole = Role;
+        }
+    }
+
     public enum Role
     {
         Recon,

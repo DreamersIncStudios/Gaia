@@ -86,6 +86,7 @@ namespace DreamersIncStudio.GAIACollective
                     );
                     var baseDataEntity = EntityManager.CreateEntity(baseEntityArch);
                     EntityManager.SetName(baseDataEntity, packInfo.PackType.ToString());
+                    EntityManager.AddBuffer<PackList>(baseDataEntity);
                     EntityManager.SetComponentData(baseDataEntity, new LocalTransform()
                     {
                         Position = transform.Position,

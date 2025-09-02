@@ -17,6 +17,7 @@ namespace DreamersIncStudio.GAIACollective
         private EntityQuery packMemberQuery;
         private ComponentLookup<Pack> packLookup;
         private ComponentLookup<LocalToWorld> transformLookup;
+        private BufferLookup<PackList> packListLookup;
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<GaiaControl>();
@@ -33,6 +34,7 @@ namespace DreamersIncStudio.GAIACollective
             });
             packLookup = state.GetComponentLookup<Pack>(false);
             transformLookup = state.GetComponentLookup<LocalToWorld>(true);
+            packListLookup = state.GetBufferLookup<PackList>(false);
         }
 
         public void OnUpdate(ref SystemState state)
@@ -44,7 +46,7 @@ namespace DreamersIncStudio.GAIACollective
             var depends = state.Dependency;
             packLookup.Update(ref state);
             transformLookup.Update(ref state);
-            
+            packListLookup.Update(ref state);
             var cmd = ecb.CreateCommandBuffer(state.WorldUnmanaged);
             var leaders = new NativeParallelHashSet<Entity>(packs.Length, Allocator.TempJob);
 
@@ -52,6 +54,7 @@ namespace DreamersIncStudio.GAIACollective
             {
                 PackEntities = packs,
                 PackLookup = packLookup,
+                PackListLookup = packListLookup,
                 ecb = cmd,
                 LeadersAssigned = leaders.AsParallelWriter()
 
@@ -61,6 +64,7 @@ namespace DreamersIncStudio.GAIACollective
             {
                 PackEntities = packs,
                 PackLookup = packLookup,
+                PackListLookup = packListLookup,
                 ecb = cmd,
                 LeadersAssigned = leaders
 
@@ -73,8 +77,7 @@ namespace DreamersIncStudio.GAIACollective
             
             depends = new UpdatePackCenter()
             {
-                PackMembers = packMember,
-                PackMembersTransform = PackMembersTransform
+                PackMembersTransform = transformLookup
                 
             }.Schedule(depends);
             
@@ -94,6 +97,7 @@ namespace DreamersIncStudio.GAIACollective
             public EntityCommandBuffer ecb;
             public NativeArray<Entity> PackEntities;
             public ComponentLookup<Pack> PackLookup;
+            public BufferLookup<PackList> PackListLookup;
             public NativeParallelHashSet<Entity>.ParallelWriter LeadersAssigned;
 
             private void Execute(Entity entity, [ChunkIndexInQuery] int chunkIndex, PassportAspect aspect)
@@ -107,6 +111,7 @@ namespace DreamersIncStudio.GAIACollective
                     pack.MemberCount++;
                     ecb.AddComponent(entity, new PackMember(packEntity));
                     PackLookup[packEntity] = pack;
+                    PackListLookup[packEntity].Add(new PackList(entity, aspect.Role));
                     LeadersAssigned.Add(entity);
                 }
             }
@@ -118,6 +123,8 @@ namespace DreamersIncStudio.GAIACollective
             public EntityCommandBuffer ecb;
             public NativeArray<Entity> PackEntities;
             public ComponentLookup<Pack> PackLookup;
+            public BufferLookup<PackList> PackListLookup;
+            
             public NativeParallelHashSet<Entity> LeadersAssigned;
 
             private void Execute(Entity entity, [ChunkIndexInQuery] int chunkIndex, PassportAspect aspect)
@@ -140,6 +147,7 @@ namespace DreamersIncStudio.GAIACollective
                     }
 
                     PackLookup[packEntity] = pack; // Save the updated pack
+                    PackListLookup[packEntity].Add(new PackList(entity, aspect.Role));
                 }
             }
 
@@ -180,19 +188,16 @@ namespace DreamersIncStudio.GAIACollective
         
         public partial struct UpdatePackCenter : IJobEntity
         {
-            [ReadOnly] public NativeArray<PackMember> PackMembers;
-            [ReadOnly] public NativeArray<LocalToWorld> PackMembersTransform;
-            void Execute( Entity entity,ref Pack pack)
+            [ReadOnly] public ComponentLookup<LocalToWorld> PackMembersTransform;
+            void Execute( Entity entity,ref Pack pack, DynamicBuffer<PackList> packLists)
             {
                 if(pack.LeaderEntity==Entity.Null) return;
                 int cnt = 0;
                 float3 center = float3.zero;
-                for (var index = 0; index < PackMembers.Length; index++)
+                foreach (var member in packLists)
                 {
-                    var member = PackMembers[index];
-                    if (entity != member.PackEntity) continue;
                     cnt++;
-                    center += PackMembersTransform[index].Position; 
+                    center += PackMembersTransform[member.PackMember].Position; 
                 }
                 pack.HerdCenter = center / cnt;
             }
