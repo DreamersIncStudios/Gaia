@@ -23,14 +23,7 @@ namespace DreamersIncStudio.GAIACollective
     [UpdateInGroup(typeof(GaiaUpdateGroup))]
     public partial class GaiaSpawnSystem : SystemBase
     {
-        private EntityQuery _gaiaLifeQuery;
 
-        protected override void OnCreate()
-        {
-            base.OnCreate();
-            _gaiaLifeQuery = GetEntityQuery(ComponentType.ReadOnly<GaiaLife>());
-        }
-        
         protected override void OnUpdate()
         {
    
