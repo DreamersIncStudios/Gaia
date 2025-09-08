@@ -17,7 +17,7 @@ MonoBehaviour:
   - SpawnScenario: 2
     SpawnID: 3
     ActiveHours: 5
-    Qty: 1
+    Qty: 5
     RespawnInterval: 15
   - SpawnScenario: 2
     SpawnID: 2

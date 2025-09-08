@@ -130,7 +130,7 @@ namespace DreamersIncStudio.GAIACollective
                     var pack = PackLookup[packEntity];
                     if (pack.LeaderEntity != Entity.Null) continue;
                     if (pack.Role != aspect.Role) continue;
-                    
+                    if(pack.FactionID!=aspect.FactionID) continue;
                     //  scoring
                     var distance = math.distance(transfom.Position, TransformLookupRO[packEntity].Position);
                     var distanceScore = DistanceInverse(distance, 0.001f); // Avoid div-by-zero
@@ -192,12 +192,14 @@ namespace DreamersIncStudio.GAIACollective
             {
                 // Skip entities that have been assigned as leaders this frame
                 if (LeadersAssigned.Contains(entity)) return;
-
+                
                 foreach (var packEntity in PackEntities)
                 {
                     var pack = PackLookup[packEntity];
                     if (pack.Filled) continue;
-
+                    if(pack.FactionID!=aspect.FactionID) continue;
+                    
+                    // Try to assign the entity to the pack (if possible)
                     for (var i = 0; i < pack.Requirements.Length; i++)
                     {
                         var requiredRole = pack.Requirements[i];

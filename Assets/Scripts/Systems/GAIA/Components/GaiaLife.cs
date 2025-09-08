@@ -1,4 +1,5 @@
 using System;
+using DreamersIncStudio.FactionSystem;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -10,12 +11,13 @@ namespace DreamersIncStudio.GAIACollective
         public TimesOfDay ActiveTimeOfDay;
         public uint HomeBiomeID;
         public Role Role; // Move to IAUS Brain 
-
-        public GaiaLife(TimesOfDay activeHour, uint HomeBiomeID)
+        public FactionNames FactionID;
+        public GaiaLife(TimesOfDay activeHour, uint HomeBiomeID, FactionNames factionID)
         {
             ActiveTimeOfDay = activeHour;
             this.HomeBiomeID = HomeBiomeID;
             Role = Role.Combat;
+            FactionID = factionID;
         }
     }
 

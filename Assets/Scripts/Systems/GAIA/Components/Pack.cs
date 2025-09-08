@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DreamersIncStudio.FactionSystem;
 using NUnit.Framework;
 using Unity.Collections;
 using Unity.Entities;
@@ -32,7 +33,7 @@ namespace DreamersIncStudio.GAIACollective
                 return count == MemberCount;
             }
         }
-
+        public FactionNames FactionID;
         public FixedList128Bytes<PackRole> Requirements;
         public Entity LeaderEntity;
         public float CohesionFactor;

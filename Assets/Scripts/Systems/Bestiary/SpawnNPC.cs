@@ -11,7 +11,7 @@ namespace DreamersInc.BestiarySystem
         {
             var info = GetCreature(ID);
             new CharacterBuilder(info.Name, out var entity)
-                .WithActiveHour(info.ActiveTimesOfDay,HomeBiomeID)
+                .WithActiveHour(info.ActiveTimesOfDay,HomeBiomeID, info.FactionID)
                 .AtLevel(info.LevelRange, PlayerLevel)
                 .WithParent(parentToLink)
                 .Build();

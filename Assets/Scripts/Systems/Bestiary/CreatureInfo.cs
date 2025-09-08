@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using DreamersIncStudio.FactionSystem;
 using DreamersIncStudio.GAIACollective;
 using Sirenix.OdinInspector;
 using Systems.Bestiary;
@@ -15,6 +16,7 @@ namespace DreamersInc.BestiarySystem
         [SerializeField] private uint creatureID;
         public uint ID { get { return creatureID; } }
         public int2 LevelRange { get; set; }
+        public FactionNames FactionID;
 
         public string Name;
         public uint ClassLevel;

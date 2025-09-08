@@ -1,4 +1,5 @@
 using System;
+using DreamersIncStudio.FactionSystem;
 using DreamersIncStudio.GAIACollective;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -26,9 +27,9 @@ namespace Systems.Bestiary
           
         }
 
-        public CharacterBuilder WithActiveHour(TimesOfDay activeHour, uint HomeBiomeID)
+        public CharacterBuilder WithActiveHour(TimesOfDay activeHour, uint HomeBiomeID, FactionNames factionID)
         {
-            manager.AddComponentData(entity, new GaiaLife(activeHour, HomeBiomeID));
+            manager.AddComponentData(entity, new GaiaLife(activeHour, HomeBiomeID, factionID));
             return this;
         }
 
