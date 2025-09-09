@@ -7,6 +7,7 @@ using Systems.Bestiary;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
+using Resources = UnityEngine.Resources;
 
 namespace DreamersInc.BestiarySystem
 {

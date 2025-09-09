@@ -88,6 +88,9 @@ namespace DreamersIncStudio.GAIACollective
                     EntityManager.SetName(baseDataEntity, packInfo.PackType.ToString());
                     EntityManager.AddBuffer<PackList>(baseDataEntity);
                     EntityManager.AddBuffer<Interactable>(baseDataEntity);
+                    EntityManager.AddBuffer<Allies>(baseDataEntity);
+                    EntityManager.AddBuffer<Enemies>(baseDataEntity);
+                    EntityManager.AddBuffer<Resources>(baseDataEntity);
                     
                     EntityManager.SetComponentData(baseDataEntity, new LocalTransform()
                     {
