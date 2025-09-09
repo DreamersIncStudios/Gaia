@@ -94,13 +94,14 @@ public partial class InteractableManagement : SystemBase
             });
         }
     }
-    public struct TargetQuadrantData
-    {
-        public Entity Entity;
-        public float3 Position;
-        public AITarget TargetInfo;
-        public float Distance { get; set; }
-    }
+  
+}
+public struct TargetQuadrantData
+{
+    public Entity Entity;
+    public float3 Position;
+    public AITarget TargetInfo;
+    public float Distance { get; set; }
 }
 
 
