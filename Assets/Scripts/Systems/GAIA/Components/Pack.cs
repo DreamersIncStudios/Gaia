@@ -43,7 +43,7 @@ namespace DreamersIncStudio.GAIACollective
         public int MemberCount;
         public uint BiomeID;
         public Role Role;
-
+        public PackState State;
         private static int2 Need(int required, Size size) => new int2(required * Mod(size), 0);
 
         private static int Mod(Size size)
@@ -60,6 +60,7 @@ namespace DreamersIncStudio.GAIACollective
 
         public static Pack AssaultTeam(uint BiomeID, Size size)=> new Pack()
         {
+            State = PackState.Spawned,
             Requirements = new FixedList128Bytes<PackRole>()
             {
                 new PackRole(Role.Recon, Need(2, size)),
@@ -81,6 +82,8 @@ namespace DreamersIncStudio.GAIACollective
 
         public static Pack Support(uint BiomeID,Size size) => new Pack()
         {
+ 
+            State = PackState.Spawned,
             Requirements =  new FixedList128Bytes<PackRole>()
             {
                 new PackRole(Role.Recon, Need(3, size)),
@@ -147,5 +150,15 @@ namespace DreamersIncStudio.GAIACollective
        Acquisition,
         Support 
         
+    }
+
+    public enum PackState
+    {
+        Spawned,
+        Filled,
+        LookingForMembers,
+        Disbanded,
+        Destroyed,
+        Active
     }
 }

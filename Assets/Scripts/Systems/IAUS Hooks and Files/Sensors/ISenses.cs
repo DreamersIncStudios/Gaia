@@ -4,159 +4,70 @@ using Unity.Entities;
 using UnityEngine;
 using Unity.Mathematics;
 using Global.Component;
-using IAUS.Core.GOAP;
-using Unity.Burst;
 // ReSharper disable FunctionRecursiveOnAllPaths
 
 namespace AISenses
 {
-
-    [System.Serializable]
-    public struct Vision : ISensor
+    
+    public interface IInteractables
     {
-        public float DetectionRange { get; set; }
-        public float Timer { get; set; } // consider using Variable Rate Manager;
-        public bool IsInRange(TargetAlignmentType alignmentType) => !TargetPosition(alignmentType).Equals( float3.zero);
-
-        public bool UpdateTargetPosition(TargetAlignmentType alignmentType) =>
-            !LastKnownPosition(alignmentType).Equals(TargetPosition(alignmentType)) || !LastKnownPosition(alignmentType).Equals(float3.zero);
-        public bool HasTarget=> TargetEnemyEntity != Entity.Null || TargetFriendlyEntity != Entity.Null;
-
-        public Entity TargetEntity(TargetAlignmentType alignmentType)
-        {
-            return alignmentType switch
-            {
-                TargetAlignmentType.Enemy => TargetEnemyEntity,
-                TargetAlignmentType.Friendly => TargetFriendlyEntity,
-                _ => Entity.Null
-            };
-        }
-
-        public float3 TargetPosition(TargetAlignmentType alignmentType)
-        {
-            return alignmentType switch
-            {
-                TargetAlignmentType.Enemy => TargetEnemyPosition,
-                TargetAlignmentType.Friendly => TargetFriendlyPosition,
-                _ => float3.zero
-            };
-        }
-
-        public float3 LastKnownPosition(TargetAlignmentType alignmentType)
-        {
-            return alignmentType switch
-            {
-                TargetAlignmentType.Enemy => LastKnownPositionEnemy,
-                TargetAlignmentType.Friendly => LastKnownPositionFriendly,
-                _ => float3.zero
-            };
-        }
-
-        public Entity TargetEnemyEntity { get; set; }
-        public Entity TargetFriendlyEntity { get; set; }
- 
-        [SerializeField] public float3 TargetEnemyPosition { get; set; }
-        public float3 LastKnownPositionEnemy { get; set; }
-        public float3 TargetFriendlyPosition { get; set; }
-        public float3 LastKnownPositionFriendly { get; set; }
-        public int DetectionRate
-        {
-            get
-            {
-                int returnValue = new int();
-                switch (EnemyAwarenessLevel)
-                {
-                    case 0:
-                        returnValue = 180;
-                        break;
-                    case 1:
-                        returnValue = 90;
-                        break;
-                    case 2:
-                        returnValue = 45;
-                        break;
-                    case 3:
-                        returnValue = 20;
-                        break;
-                    case 4:
-                        returnValue = 10;
-                        break;
-                    case 5:
-                        returnValue = 5;
-                        break;
-                }
-                return returnValue;
-            }
-        }
-        public int AlertRate { get; set; }
-
-        [Range(0, 5)]
-        public int EnemyAwarenessLevel;  // Character alert level
-        public float3 HeadPositionOffset;
-        public float3 ThreatPosition;
-
-        public float ViewRadius;
-        [Range(0, 360)]
-        public int ViewAngle;
-        public float EngageRadius;
-        public float AlertModifer; // If AI is on high alert they will notice the enemy sooner
-        public void InitializeSense()
-        {
-            AlertRate = 10;
-            ViewRadius = 250;
-            ViewAngle = 120;
-            EngageRadius = 50;
-            AlertModifer = 1;
-        }
-        public void UpdateSense()
-        {
-            ViewRadius = 250;
-            ViewAngle = 120;
-            EngageRadius = 50;
-            AlertModifer = 1;
-        }
+        public float Dist { get; }
 
     }
+
     [InternalBufferCapacity(0)]
-    public struct ScanPositionBuffer : IBufferElementData
+    public struct Enemies : IBufferElementData,IInteractables
     {
         public Target target;
-       public float dist;
+        public float Dist { get; }
 
-        public static implicit operator Target(ScanPositionBuffer e) { return e; }
-        public static implicit operator ScanPositionBuffer(Target e) { return new ScanPositionBuffer { target = e }; }
+        public static implicit operator Target(Enemies e) { return e; }
+        public static implicit operator Enemies(Target e) { return new Enemies { target = e }; }
+    }
+    [InternalBufferCapacity(0)]
+    public struct Allies : IBufferElementData,IInteractables
+    {
+        public Target target;
+        public float Dist { get; }
+
+        public static implicit operator Target(Allies e) { return e; }
+        public static implicit operator Allies(Target e) { return new Allies() { target = e }; }
+    }
+    [InternalBufferCapacity(0)]
+    public struct PlacesOfInterest : IBufferElementData,IInteractables
+    {
+        public Target target;
+        public float Dist { get; }
+
+        public static implicit operator Target(PlacesOfInterest e) { return e; }
+        public static implicit operator PlacesOfInterest(Target e) { return new PlacesOfInterest() { target = e }; }
+    }
+    [InternalBufferCapacity(0)]
+    public struct Resources : IBufferElementData,IInteractables
+    {
+        public Target target;
+        public float Dist { get; }
+
+        public static implicit operator Target(Resources e) { return e; }
+        public static implicit operator Resources(Target e) { return new Resources() { target = e }; }
     }
 
-    public struct SortScanPositionByDistance : IComparer<ScanPositionBuffer>
-{
-    public int Compare(ScanPositionBuffer x, ScanPositionBuffer y)
+    public struct SortScanPositionByDistance : IComparer<Enemies>
     {
-        return x.dist.CompareTo(y.dist);
-    }
-}
-
-    public struct HitDistanceComparer : IComparer<ScanPositionBuffer>
-    {
-        public int Compare(ScanPositionBuffer lhs, ScanPositionBuffer rhs)
+        public int Compare(Enemies x, Enemies y)
         {
-            return lhs.dist.CompareTo(rhs.dist);
+            return x.Dist.CompareTo(y.Dist);
         }
     }
 
-    public struct CoverLocationBuffer : IBufferElementData
+    public struct HitDistanceComparer : IComparer<Enemies>
     {
-        public struct TargetCover
+        public int Compare(Enemies lhs, Enemies rhs)
         {
-            public float3 Location;
-            public float Dist;
-            public Entity CoverEntity;
+            return lhs.Dist.CompareTo(rhs.Dist);
         }
-
-        public TargetCover Target;
-        
-        public static implicit operator TargetCover(CoverLocationBuffer e) { return e; }
-        public static implicit operator CoverLocationBuffer(TargetCover e) { return new CoverLocationBuffer { Target = e }; }
     }
+
     public struct Target
     {
         public Entity Entity;
@@ -170,8 +81,5 @@ namespace AISenses
         public float PerceptilabilityScore;
     }
 
-    public enum TargetAlignmentType
-    {
-        All,Enemy, Friendly
-    }
+ 
 }
